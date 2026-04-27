@@ -1,119 +1,914 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Auto Serwis - Rezerwacja</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pitstop Auto Service</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #070b0f;
+      --panel: #11171d;
+      --panel2: #151b22;
+      --border: rgba(255,255,255,.10);
+      --border2: rgba(255,255,255,.16);
+      --text: #e8edf5;
+      --muted: #98a3b2;
+      --blue: #2f6df6;
+      --blue2: #2458d9;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      padding: 30px;
+      min-height: 100vh;
+      font-family: Inter, sans-serif;
+      background:
+        radial-gradient(circle at 35% 0%, rgba(58, 111, 255, .10), transparent 30%),
+        linear-gradient(180deg, #080d12, #05080c);
+      color: var(--text);
+      padding: 34px 42px;
     }
 
-    .box {
-      max-width: 500px;
-      margin: auto;
-      background: #1c1c1c;
-      padding: 25px;
-      border-radius: 16px;
+    .app {
+      max-width: 1540px;
+      margin: 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 30px 38px 36px;
+      background: rgba(10, 15, 21, .78);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 30px 90px rgba(0,0,0,.45);
     }
 
-    input, textarea, select, button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
+    header {
+      height: 42px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      color: #f4f7fb;
+    }
+.field input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #dce2eb;
+  font-size: 15px;
+  font-family: Inter, sans-serif;
+}
+
+.field input::placeholder {
+  color: #7f8895;
+}
+    .brand h1 {
+      font-size: 28px;
+      letter-spacing: .5px;
+      font-weight: 800;
+    }
+
+    .brand span {
+      font-size: 13px;
+      color: #82a4c8;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+
+    .secure {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #9aa5b4;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 430px;
+      gap: 26px;
+    }
+
+    .main-panel,
+    .summary {
+      border: 1px solid var(--border2);
       border-radius: 10px;
-      border: none;
-      font-size: 16px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015)),
+        #11171d;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 22px 50px rgba(0,0,0,.22);
+      overflow: hidden;
     }
 
-    button {
-      background: #e6332a;
+    .steps {
+      display: grid;
+      grid-template-columns: auto 1fr auto 1fr auto 1fr auto;
+      align-items: center;
+      padding: 28px 34px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #8f98a7;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .step.active {
+      color: #fff;
+    }
+
+    .num {
+      width: 31px;
+      height: 31px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.09);
+      color: #b4bcc8;
+      font-weight: 700;
+    }
+
+    .active .num {
+      background: linear-gradient(135deg, #4d86ff, #1e5bea);
       color: white;
-      font-weight: bold;
+      box-shadow: 0 0 28px rgba(48,109,246,.45);
+    }
+
+    .line {
+      height: 1px;
+      background: rgba(255,255,255,.10);
+      margin: 0 20px;
+    }
+
+    .content {
+      padding: 28px 32px 24px;
+    }
+
+    .label {
+      color: #bac3d0;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: .3px;
+    }
+
+    .services {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px 20px;
+      margin-bottom: 22px;
+    }
+
+    .service {
+      min-height: 120px;
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      background: linear-gradient(135deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+      padding: 22px 22px;
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      position: relative;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .service:hover {
+      border-color: rgba(47,109,246,.55);
+    }
+
+    .service.selected {
+      border-color: #2f6df6;
+      box-shadow: inset 0 0 0 1px rgba(47,109,246,.25);
+    }
+
+    .service i {
+      width: 48px;
+      height: 48px;
+      color: #a7b0bd;
+      stroke-width: 1.8;
+      align-self: center;
+    }
+
+    .service.selected i {
+      color: #4e82ff;
+    }
+
+    .service h3 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .service .price {
+      font-size: 16px;
+      color: #c8ced8;
+      margin-bottom: 8px;
+    }
+
+    .service p {
+      font-size: 14px;
+      line-height: 1.4;
+      color: #a0a8b4;
+    }
+
+    .check {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4f8aff, #1f5ce9);
+      display: none;
+      place-items: center;
+    }
+
+    .selected .check {
+      display: grid;
+    }
+
+    .check i {
+      width: 17px;
+      height: 17px;
+      color: white !important;
+    }
+
+    .middle {
+      display: grid;
+      grid-template-columns: 1fr 1.22fr;
+      gap: 30px;
+      margin-top: 10px;
+    }
+
+    .calendar {
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      padding: 18px 26px 20px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .cal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .cal-head h3 {
+      font-size: 18px;
+    }
+
+    .cal-head button {
+      background: none;
+      border: 0;
+      color: #b8c0cc;
       cursor: pointer;
     }
 
-    .msg {
-      margin-top: 15px;
-      font-weight: bold;
+    .week,
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      gap: 12px;
+    }
+
+    .week {
+      color: #9fa8b4;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .day {
+      height: 24px;
+      color: #dbe1ea;
+      font-size: 15px;
+      display: grid;
+      place-items: center;
+    }
+
+    .day.muted {
+      color: #697381;
+    }
+
+    .day.active {
+      width: 35px;
+      height: 35px;
+      margin: -5px auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4c86ff, #1f5be8);
+      color: white;
+      box-shadow: 0 0 24px rgba(47,109,246,.45);
+    }
+
+    .times {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .time {
+      height: 54px;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      background: rgba(255,255,255,.035);
+      color: #dce2eb;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .time.active {
+      background: linear-gradient(135deg, rgba(47,109,246,.75), rgba(30,84,220,.75));
+      border-color: #3574ff;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+
+    .note {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #a7b0bc;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .details {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px 24px;
+    }
+
+    .field {
+      height: 50px;
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 13px;
+      color: #dce2eb;
+      position: relative;
+      background: rgba(255,255,255,.018);
+    }
+
+    .field span {
+      position: absolute;
+      top: -9px;
+      left: 12px;
+      background: #11171d;
+      padding: 0 6px;
+      font-size: 12px;
+      color: #aeb6c2;
+    }
+
+    .field i {
+      width: 19px;
+      color: #9aa5b2;
+    }
+
+    .summary {
+      padding: 34px 30px;
+    }
+
+    .summary h2 {
+      font-size: 15px;
+      color: #c6ceda;
+      margin-bottom: 34px;
+    }
+
+    .car {
+      width: 100%;
+      height: 180px;
+      margin-bottom: 20px;
+      position: relative;
+      background:
+        radial-gradient(ellipse at center, rgba(255,255,255,.12), transparent 42%),
+        linear-gradient(180deg, transparent, rgba(0,0,0,.25));
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .car::before {
+      content: "";
+      position: absolute;
+      left: 32px;
+      right: 20px;
+      top: 64px;
+      height: 72px;
+      border-radius: 70px 90px 18px 18px;
+      background: linear-gradient(180deg, #30363d, #05070a);
+      box-shadow: inset 0 6px 12px rgba(255,255,255,.14), 0 20px 35px rgba(0,0,0,.7);
+      transform: skewX(-7deg);
+    }
+
+    .car::after {
+      content: "";
+      position: absolute;
+      left: 104px;
+      top: 42px;
+      width: 190px;
+      height: 58px;
+      border-radius: 80px 80px 6px 8px;
+      background: linear-gradient(180deg, #39404a, #12161b);
+      clip-path: polygon(12% 100%, 28% 20%, 78% 12%, 96% 100%);
+      opacity: .95;
+    }
+
+    .wheel {
+      position: absolute;
+      bottom: 34px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #9aa2ad 0 20%, #161b21 21% 48%, #050608 49%);
+      border: 3px solid #262d35;
+      z-index: 3;
+    }
+
+    .w1 { left: 96px; }
+    .w2 { right: 65px; }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      gap: 12px;
+      align-items: start;
+      margin: 24px 0;
+      color: #c8d0db;
+    }
+
+    .summary-row i {
+      width: 21px;
+      color: #96a1af;
+    }
+
+    .summary-row .name {
+      color: #aeb7c4;
+      font-weight: 600;
+    }
+
+    .summary-row .value {
+      text-align: right;
+      color: #f1f4f8;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .summary hr {
+      border: 0;
+      height: 1px;
+      background: rgba(255,255,255,.10);
+      margin: 28px 0;
+    }
+
+    .total-label {
+      font-size: 15px;
+      font-weight: 800;
+      color: #c8d0db;
+      margin-bottom: 10px;
+    }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total .amount {
+      color: #4d82ff;
+      font-size: 34px;
+      font-weight: 800;
+    }
+
+    .small {
+      color: #b0b8c5;
+      line-height: 1.55;
+      font-size: 14px;
+      margin: 26px 0 34px;
+    }
+
+    .book {
+      width: 100%;
+      height: 70px;
+      border: 0;
+      border-radius: 5px;
+      background: linear-gradient(135deg, #3f7cff, #1358ef);
+      color: white;
+      font-size: 21px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      cursor: pointer;
+      box-shadow: 0 18px 40px rgba(28,91,239,.28);
+    }
+
+    .cancel {
+      margin-top: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      color: #a7b0bd;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      body {
+        padding: 18px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .services {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .summary {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        padding: 22px 16px;
+      }
+
+      header {
+        align-items: flex-start;
+        height: auto;
+        gap: 16px;
+      }
+
+      .brand h1 {
+        font-size: 22px;
+      }
+
+      .secure {
+        display: none;
+      }
+
+      .steps {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        padding: 20px;
+      }
+
+      .line {
+        display: none;
+      }
+
+      .content {
+        padding: 22px 18px;
+      }
+
+      .services,
+      .middle,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .service {
+        grid-template-columns: 62px 1fr;
+      }
+
+      .times {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .summary {
+        padding: 26px 22px;
+      }
     }
   </style>
 </head>
+
 <body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <i class="logo" data-lucide="settings"></i>
+        <h1>PITSTOP <span>AUTO SERVICE</span></h1>
+      </div>
 
-  <div class="box">
-    <h1>Umów wizytę</h1>
-    <p>Wypełnij formularz, a skontaktujemy się z Tobą.</p>
+      <div class="secure">
+        <i data-lucide="shield-check"></i>
+        Secure Booking
+      </div>
+    </header>
 
-    <input id="name" placeholder="Imię i nazwisko">
-    <input id="phone" placeholder="Telefon">
-    <input id="car" placeholder="Marka i model auta">
+    <div class="layout">
+      <main class="main-panel">
+        <div class="steps">
+          <div class="step active"><div class="num">1</div>Service</div>
+          <div class="line"></div>
+          <div class="step"><div class="num">2</div>Date & Time</div>
+          <div class="line"></div>
+          <div class="step"><div class="num">3</div>Your Details</div>
+          <div class="line"></div>
+          <div class="step"><div class="num">4</div>Confirm</div>
+        </div>
 
-    <select id="service">
-      <option value="">Wybierz usługę</option>
-      <option>Wymiana oleju</option>
-      <option>Diagnostyka</option>
-      <option>Naprawa hamulców</option>
-      <option>Serwis klimatyzacji</option>
-      <option>Inna usługa</option>
-    </select>
+        <div class="content">
+          <div class="label">SELECT SERVICE</div>
 
-    <input id="date" type="date">
-    <textarea id="message" placeholder="Opisz problem"></textarea>
+          <div class="services">
+            <div class="service selected" data-name="Oil Change" data-price="$49.99">
+              <i data-lucide="badge-help"></i>
+              <div>
+                <h3>Oil Change</h3>
+                <div class="price">$49.99</div>
+                <p>Oil and filter change with inspection.</p>
+              </div>
+              <div class="check"><i data-lucide="check"></i></div>
+            </div>
 
-    <button onclick="sendReservation()">Umów wizytę</button>
+            <div class="service" data-name="Diagnostics" data-price="$89.99">
+              <i data-lucide="scan-line"></i>
+              <div>
+                <h3>Diagnostics</h3>
+                <div class="price">$89.99</div>
+                <p>Full system scan and report.</p>
+              </div>
+              <div class="check"><i data-lucide="check"></i></div>
+            </div>
 
-    <div class="msg" id="msg"></div>
+            <div class="service" data-name="Brake Service" data-price="$149.99">
+              <i data-lucide="disc-3"></i>
+              <div>
+                <h3>Brake Service</h3>
+                <div class="price">$149.99</div>
+                <p>Brake inspection and maintenance.</p>
+              </div>
+              <div class="check"><i data-lucide="check"></i></div>
+            </div>
+
+            <div class="service" data-name="Tire Service" data-price="$59.99">
+              <i data-lucide="circle-dot"></i>
+              <div>
+                <h3>Tire Service</h3>
+                <div class="price">$59.99</div>
+                <p>Tire inspection and rotation.</p>
+              </div>
+              <div class="check"><i data-lucide="check"></i></div>
+            </div>
+
+            <div class="service" data-name="Battery Service" data-price="$69.99">
+              <i data-lucide="car-battery"></i>
+              <div>
+                <h3>Battery Service</h3>
+                <div class="price">$69.99</div>
+                <p>Battery test and replacement.</p>
+              </div>
+              <div class="check"><i data-lucide="check"></i></div>
+            </div>
+
+            <div class="service" data-name="General Repair" data-price="Custom">
+              <i data-lucide="wrench"></i>
+              <div>
+                <h3>General Repair</h3>
+                <div class="price">Custom</div>
+                <p>Various repair and maintenance services.</p>
+              </div>
+              <div class="check"><i data-lucide="check"></i></div>
+            </div>
+          </div>
+
+          <div class="middle">
+            <section>
+              <div class="label">CHOOSE DATE</div>
+              <div class="calendar">
+                <div class="cal-head">
+                  <button><i data-lucide="chevron-left"></i></button>
+                  <h3>June 2025</h3>
+                  <button><i data-lucide="chevron-right"></i></button>
+                </div>
+
+                <div class="week">
+                  <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+                </div>
+
+                <div class="days">
+                  <div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div>
+                  <div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div><div class="day">13</div><div class="day">14</div>
+                  <div class="day">15</div><div class="day">16</div><div class="day">17</div><div class="day active">18</div><div class="day">19</div><div class="day">20</div><div class="day">21</div>
+                  <div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div><div class="day">27</div><div class="day">28</div>
+                  <div class="day">29</div><div class="day">30</div><div class="day muted">1</div><div class="day muted">2</div><div class="day muted">3</div><div class="day muted">4</div><div class="day muted">5</div>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <div class="label">CHOOSE TIME</div>
+              <div class="times">
+                <button class="time">08:00 AM</button>
+                <button class="time">09:00 AM</button>
+                <button class="time">10:00 AM</button>
+                <button class="time">11:00 AM</button>
+                <button class="time active">12:00 PM</button>
+                <button class="time">01:00 PM</button>
+                <button class="time">02:00 PM</button>
+                <button class="time">03:00 PM</button>
+                <button class="time">04:00 PM</button>
+                <button class="time">05:00 PM</button>
+                <button class="time">06:00 PM</button>
+                <button class="time">07:00 PM</button>
+              </div>
+
+              <div class="note">
+                <i data-lucide="clock"></i>
+                All times are estimated in 60 min slots
+              </div>
+            </section>
+          </div>
+
+       <section class="details">
+  <div class="label">YOUR DETAILS</div>
+
+  <div class="form-grid">
+    <div class="field">
+      <span>Full Name</span>
+      <i data-lucide="user"></i>
+      <input id="name" placeholder="Jan Kowalski">
+    </div>
+
+    <div class="field">
+      <span>Phone Number</span>
+      <i data-lucide="phone"></i>
+      <input id="phone" placeholder="+48 123 456 789">
+    </div>
+
+    <div class="field">
+      <span>Email Address</span>
+      <i data-lucide="mail"></i>
+      <input id="email" placeholder="email@gmail.com">
+    </div>
+
+    <div class="field">
+      <span>Car Model</span>
+      <i data-lucide="car"></i>
+      <input id="car" placeholder="Toyota Camry 2020">
+    </div>
+  </div>
+</section>
+        </div>
+      </main>
+
+      <aside class="summary">
+        <h2>APPOINTMENT SUMMARY</h2>
+
+        <div class="car">
+          <div class="wheel w1"></div>
+          <div class="wheel w2"></div>
+        </div>
+
+        <div class="summary-row">
+          <i data-lucide="briefcase"></i>
+          <div class="name">Service</div>
+          <div class="value" id="summaryService">Oil Change<br><span>$49.99</span></div>
+        </div>
+
+        <div class="summary-row">
+          <i data-lucide="calendar"></i>
+          <div class="name">Date</div>
+          <div class="value">Wed, Jun 18, 2025</div>
+        </div>
+
+        <div class="summary-row">
+          <i data-lucide="clock-3"></i>
+          <div class="name">Time</div>
+          <div class="value" id="summaryTime">12:00 PM</div>
+        </div>
+
+        <div class="summary-row">
+          <i data-lucide="alarm-clock"></i>
+          <div class="name">Duration</div>
+          <div class="value">60 minutes</div>
+        </div>
+
+        <hr>
+
+        <div class="total">
+          <div class="total-label">ESTIMATED TOTAL</div>
+          <div class="amount" id="summaryTotal">$49.99</div>
+        </div>
+
+        <p class="small">
+          You'll be able to review and confirm your appointment in the next step.
+        </p>
+
+       <button class="book" onclick="bookAppointment()">
+          <i data-lucide="calendar-days"></i>
+          Book Appointment
+        </button>
+
+        <div class="cancel">
+          <i data-lucide="shield-check"></i>
+          Free cancellation up to 2 hours before
+        </div>
+      </aside>
+    </div>
   </div>
 
   <script>
-    async function sendReservation() {
-      const msg = document.getElementById("msg");
+    lucide.createIcons();
 
-      const reservation = {
-        name: document.getElementById("name").value,
-        phone: document.getElementById("phone").value,
-        car: document.getElementById("car").value,
-        service: document.getElementById("service").value,
-        date: document.getElementById("date").value,
-        message: document.getElementById("message").value,
-        status: "Nowa"
-      };
+    const services = document.querySelectorAll(".service");
+    const summaryService = document.getElementById("summaryService");
+    const summaryTotal = document.getElementById("summaryTotal");
 
-      if (!reservation.name || !reservation.phone) {
-        msg.textContent = "Uzupełnij imię i telefon.";
-        msg.style.color = "orange";
-        return;
-      }
+    services.forEach(card => {
+      card.addEventListener("click", () => {
+        services.forEach(c => c.classList.remove("selected"));
+        card.classList.add("selected");
 
-      const { error } = await supabaseClient
-        .from("reservations")
-        .insert([reservation]);
+        const name = card.dataset.name;
+        const price = card.dataset.price;
 
-      if (error) {
-        msg.textContent = "Błąd zapisu rezerwacji.";
-        msg.style.color = "red";
-        console.log(error);
-      } else {
-        msg.textContent = "Rezerwacja została wysłana!";
-        msg.style.color = "lightgreen";
+        summaryService.innerHTML = `${name}<br><span>${price}</span>`;
+        summaryTotal.textContent = price === "Custom" ? "Custom" : price;
+      });
+    });
 
-        document.getElementById("name").value = "";
-        document.getElementById("phone").value = "";
-        document.getElementById("car").value = "";
-        document.getElementById("service").value = "";
-        document.getElementById("date").value = "";
-        document.getElementById("message").value = "";
-      }
-    }
+    const times = document.querySelectorAll(".time");
+    const summaryTime = document.getElementById("summaryTime");
+
+    times.forEach(time => {
+      time.addEventListener("click", () => {
+        times.forEach(t => t.classList.remove("active"));
+        time.classList.add("active");
+        summaryTime.textContent = time.textContent;
+      });
+    });
+async function bookAppointment() {
+  const selectedService = document.querySelector(".service.selected");
+  const selectedTime = document.querySelector(".time.active");
+
+  const reservation = {
+    name: document.getElementById("name").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    car: document.getElementById("car").value.trim(),
+    service: selectedService.dataset.name,
+    date: "2025-06-18",
+    message: "Email: " + document.getElementById("email").value.trim() + " | Godzina: " + selectedTime.textContent.trim(),
+    status: "Nowa"
+  };
+
+  if (!reservation.name || !reservation.phone) {
+    alert("Uzupełnij imię i telefon.");
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("reservations")
+    .insert([reservation]);
+
+  if (error) {
+    alert("Błąd zapisu rezerwacji.");
+    console.log(error);
+  } else {
+    alert("Rezerwacja została wysłana!");
+
+    document.getElementById("name").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("car").value = "";
+  }
+}
   </script>
-
 </body>
 </html>
