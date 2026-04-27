@@ -713,23 +713,19 @@
               <div class="label">CHOOSE DATE</div>
               <div class="calendar">
                 <div class="cal-head">
-                  <button><i data-lucide="chevron-left"></i></button>
-                  <h3>June 2025</h3>
-                  <button><i data-lucide="chevron-right"></i></button>
+                  <button onclick="prevMonth()"><i data-lucide="chevron-left"></i></button>
+                  <h3 id="calendarTitle"></h3>
+                 <button onclick="nextMonth()"><i data-lucide="chevron-right"></i></button>
                 </div>
 
                 <div class="week">
                   <div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
                 </div>
 
-                <div class="days">
-                  <div class="day">1</div><div class="day">2</div><div class="day">3</div><div class="day">4</div><div class="day">5</div><div class="day">6</div><div class="day">7</div>
-                  <div class="day">8</div><div class="day">9</div><div class="day">10</div><div class="day">11</div><div class="day">12</div><div class="day">13</div><div class="day">14</div>
-                  <div class="day">15</div><div class="day">16</div><div class="day">17</div><div class="day active">18</div><div class="day">19</div><div class="day">20</div><div class="day">21</div>
-                  <div class="day">22</div><div class="day">23</div><div class="day">24</div><div class="day">25</div><div class="day">26</div><div class="day">27</div><div class="day">28</div>
-                  <div class="day">29</div><div class="day">30</div><div class="day muted">1</div><div class="day muted">2</div><div class="day muted">3</div><div class="day muted">4</div><div class="day muted">5</div>
+                <div class="days" id="calendarDays"></div>
+                 
                 </div>
-              </div>
+
             </section>
 
             <section>
@@ -805,7 +801,7 @@
         <div class="summary-row">
           <i data-lucide="calendar"></i>
           <div class="name">Date</div>
-          <div class="value">Wed, Jun 18, 2025</div>
+         <div class="value" id="summaryDate"></div>
         </div>
 
         <div class="summary-row">
@@ -874,6 +870,87 @@
         summaryTime.textContent = time.textContent;
       });
     });
+    const calendarDays = document.getElementById("calendarDays");
+const calendarTitle = document.getElementById("calendarTitle");
+const summaryDate = document.getElementById("summaryDate");
+
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let selectedDate = "";
+
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+function renderCalendar() {
+  calendarDays.innerHTML = "";
+
+  calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.innerHTML += `<div class="day muted"></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateValue = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    const isToday =
+      day === new Date().getDate() &&
+      currentMonth === new Date().getMonth() &&
+      currentYear === new Date().getFullYear();
+
+    calendarDays.innerHTML += `
+      <div class="day ${isToday ? "active" : ""}" data-date="${dateValue}">
+        ${day}
+      </div>
+    `;
+
+    if (isToday) {
+      selectedDate = dateValue;
+      if (summaryDate) summaryDate.textContent = dateValue;
+    }
+  }
+
+  document.querySelectorAll(".day:not(.muted)").forEach(dayEl => {
+    dayEl.addEventListener("click", () => {
+      document.querySelectorAll(".day").forEach(d => d.classList.remove("active"));
+      dayEl.classList.add("active");
+
+      selectedDate = dayEl.dataset.date;
+      if (summaryDate) summaryDate.textContent = selectedDate;
+    });
+  });
+
+  lucide.createIcons();
+}
+
+function prevMonth() {
+  currentMonth--;
+
+  if (currentMonth < 0) {
+    currentMonth = 11;
+    currentYear--;
+  }
+
+  renderCalendar();
+}
+
+function nextMonth() {
+  currentMonth++;
+
+  if (currentMonth > 11) {
+    currentMonth = 0;
+    currentYear++;
+  }
+
+  renderCalendar();
+}
+
+renderCalendar();
 async function bookAppointment() {
   const selectedService = document.querySelector(".service.selected");
   const selectedTime = document.querySelector(".time.active");
@@ -883,7 +960,7 @@ async function bookAppointment() {
     phone: document.getElementById("phone").value.trim(),
     car: document.getElementById("car").value.trim(),
     service: selectedService.dataset.name,
-    date: "2025-06-18",
+    date: selectedDate,
     message: "Email: " + document.getElementById("email").value.trim() + " | Godzina: " + selectedTime.textContent.trim(),
     status: "Nowa"
   };
