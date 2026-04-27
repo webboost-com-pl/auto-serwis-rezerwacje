@@ -1,1 +1,119 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Auto Serwis - Rezerwacja</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      padding: 30px;
+    }
+
+    .box {
+      max-width: 500px;
+      margin: auto;
+      background: #1c1c1c;
+      padding: 25px;
+      border-radius: 16px;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #e6332a;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .msg {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h1>Umów wizytę</h1>
+    <p>Wypełnij formularz, a skontaktujemy się z Tobą.</p>
+
+    <input id="name" placeholder="Imię i nazwisko">
+    <input id="phone" placeholder="Telefon">
+    <input id="car" placeholder="Marka i model auta">
+
+    <select id="service">
+      <option value="">Wybierz usługę</option>
+      <option>Wymiana oleju</option>
+      <option>Diagnostyka</option>
+      <option>Naprawa hamulców</option>
+      <option>Serwis klimatyzacji</option>
+      <option>Inna usługa</option>
+    </select>
+
+    <input id="date" type="date">
+    <textarea id="message" placeholder="Opisz problem"></textarea>
+
+    <button onclick="sendReservation()">Umów wizytę</button>
+
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <script>
+    async function sendReservation() {
+      const msg = document.getElementById("msg");
+
+      const reservation = {
+        name: document.getElementById("name").value,
+        phone: document.getElementById("phone").value,
+        car: document.getElementById("car").value,
+        service: document.getElementById("service").value,
+        date: document.getElementById("date").value,
+        message: document.getElementById("message").value,
+        status: "Nowa"
+      };
+
+      if (!reservation.name || !reservation.phone) {
+        msg.textContent = "Uzupełnij imię i telefon.";
+        msg.style.color = "orange";
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from("reservations")
+        .insert([reservation]);
+
+      if (error) {
+        msg.textContent = "Błąd zapisu rezerwacji.";
+        msg.style.color = "red";
+        console.log(error);
+      } else {
+        msg.textContent = "Rezerwacja została wysłana!";
+        msg.style.color = "lightgreen";
+
+        document.getElementById("name").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("car").value = "";
+        document.getElementById("service").value = "";
+        document.getElementById("date").value = "";
+        document.getElementById("message").value = "";
+      }
+    }
+  </script>
+
+</body>
+</html>
