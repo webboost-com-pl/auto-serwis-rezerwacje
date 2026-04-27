@@ -7,7 +7,8 @@
   <title>Prime Auto Care — Panel mechanika</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
   <style>
     * {
       margin: 0;
@@ -646,7 +647,66 @@
       }
     };
 
-    let reservations = [];
+   let reservations = [];
+
+async function loadReservations() {
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+
+  if (!sessionData.session) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("reservations")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.log(error);
+    alert("Błąd pobierania rezerwacji.");
+    return;
+  }
+
+  reservations = data.map(r => {
+    const msg = r.message || "";
+
+    const emailMatch = msg.match(/Email:\s*([^|]+)/);
+    const timeMatch = msg.match(/Godzina:\s*([^|]+)/);
+    const plateMatch = msg.match(/Rejestracja:\s*([^|]+)/);
+
+    const carParts = (r.car || "").split(" ");
+
+    const serviceData = Object.values(services).find(s => s.name === r.service) || {
+      name: r.service || "Nieznana usługa",
+      description: "Usługa dodana z panelu rezerwacji",
+      price: 0
+    };
+
+    return {
+      id: r.id,
+      status: r.status || "Oczekuje",
+      service: serviceData,
+      date: r.date || "-",
+      time: timeMatch ? timeMatch[1].trim() : "-",
+      duration: "1.5 – 2 godz.",
+      customer: {
+        name: r.name || "-",
+        phone: r.phone || "-",
+        email: emailMatch ? emailMatch[1].trim() : "-"
+      },
+      vehicle: {
+        brand: carParts[0] || "-",
+        model: carParts[1] || "-",
+        year: carParts[2] || "-",
+        registration: plateMatch ? plateMatch[1].trim() : "-"
+      },
+      notifications: true
+    };
+  });
+
+  renderReservations();
+}
 
     const jobsEl = document.getElementById("jobs");
     const emptyEl = document.getElementById("emptyState");
@@ -856,29 +916,36 @@
       renderStats();
     }
 
-    function startReservation(id) {
-      reservations = reservations.map(reservation => {
-        if (reservation.id === id) {
-          return { ...reservation, status: "W trakcie" };
-        }
+   async function startReservation(id) {
+  await supabaseClient
+    .from("reservations")
+    .update({ status: "W trakcie" })
+    .eq("id", id);
 
-        return reservation;
-      });
+  loadReservations();
+}
 
-      renderReservations();
-    }
+async function finishReservation(id) {
+  await supabaseClient
+    .from("reservations")
+    .update({ status: "Zakończone" })
+    .eq("id", id);
 
-    function finishReservation(id) {
-      reservations = reservations.filter(reservation => reservation.id !== id);
-      renderReservations();
-    }
+  loadReservations();
+}
 
-    function cancelReservation(id) {
-      reservations = reservations.filter(reservation => reservation.id !== id);
-      renderReservations();
-    }
+async function cancelReservation(id) {
+  const confirmDelete = confirm("Na pewno usunąć tę rezerwację?");
+  if (!confirmDelete) return;
 
-    renderReservations();
+  await supabaseClient
+    .from("reservations")
+    .delete()
+    .eq("id", id);
+
+  loadReservations();
+}
+    loadReservations();
   </script>
 </body>
 </html>
