@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PitStop Auto Service - Bookings</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #07101a;
+      --panel: rgba(15, 24, 36, .82);
+      --panel2: rgba(13, 22, 34, .92);
+      --border: rgba(255,255,255,.09);
+      --border2: rgba(255,255,255,.13);
+      --text: #f4f7fb;
+      --muted: #96a1b4;
+      --blue: #246bff;
+      --blue2: #0b5cff;
+      --green: #22c55e;
+      --orange: #fb8500;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(37,99,235,.13), transparent 28%),
+        radial-gradient(circle at 80% 15%, rgba(59,130,246,.08), transparent 30%),
+        linear-gradient(135deg, #050b12, #07111c 55%, #050a10);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(4,10,17,.45);
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      padding: 32px 16px;
+      border-right: 1px solid var(--border2);
+      background: rgba(5, 13, 22, .76);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100vh;
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 42px;
+      padding: 0 16px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #155cff;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 30px rgba(36,107,255,.35);
+    }
+
+    .brand h1 {
+      font-size: 26px;
+      line-height: 1;
+      letter-spacing: -.7px;
+      font-weight: 900;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .8px;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    .nav a {
+      height: 58px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 18px;
+      border-radius: 8px;
+      color: #aab4c6;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      transition: .2s;
+    }
+
+    .nav a.active {
+      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,58,138,.8));
+      color: white;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    .nav a:hover {
+      background: rgba(255,255,255,.05);
+      color: white;
+    }
+
+    .user {
+      height: 72px;
+      padding: 0 16px;
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      background: rgba(15, 27, 42, .75);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      color: #1e293b;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+
+    .user strong {
+      font-size: 14px;
+    }
+
+    .user small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .user i {
+      margin-left: auto;
+      color: var(--muted);
+    }
+
+    /* MAIN */
+
+    .main {
+      padding: 34px 24px 36px 30px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .title h2 {
+      font-size: 27px;
+      letter-spacing: -.6px;
+      margin-bottom: 8px;
+    }
+
+    .title p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .search {
+      width: 380px;
+      height: 50px;
+      border-radius: 7px;
+      border: 1px solid var(--border2);
+      background: rgba(8, 15, 25, .8);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+      color: var(--muted);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    }
+
+    .search input {
+      flex: 1;
+      background: none;
+      border: 0;
+      outline: 0;
+      color: white;
+      font-size: 14px;
+    }
+
+    .key {
+      padding: 4px 8px;
+      background: rgba(255,255,255,.08);
+      border-radius: 5px;
+      font-size: 12px;
+      color: #aeb8c8;
+    }
+
+    .bell {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+    }
+
+    .badge {
+      position: absolute;
+      top: 0;
+      right: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--blue);
+      font-size: 11px;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+
+    .new-btn {
+      height: 50px;
+      border: 0;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      font-weight: 700;
+      padding: 0 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 12px 30px rgba(37,99,235,.22);
+    }
+
+    /* STATS */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .stat {
+      height: 118px;
+      border: 1px solid var(--border2);
+      background: linear-gradient(145deg, rgba(17, 30, 45, .8), rgba(9, 16, 27, .78));
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 0 30px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .stat-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+    }
+
+    .stat.blue .stat-icon { background: rgba(37,99,235,.18); color: #2f7bff; }
+    .stat.green .stat-icon { background: rgba(34,197,94,.16); color: var(--green); }
+    .stat.orange .stat-icon { background: rgba(251,133,0,.15); color: var(--orange); }
+    .stat.purple .stat-icon { background: rgba(139,92,246,.16); color: var(--purple); }
+
+    .stat h3 {
+      font-size: 27px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    /* TABLE CARD */
+
+    .card {
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      background: rgba(12, 22, 35, .8);
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,.18);
+    }
+
+    .card-head {
+      height: 84px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-head h3 {
+      font-size: 17px;
+    }
+
+    .tab {
+      height: 38px;
+      padding: 0 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+      background: rgba(8, 15, 25, .55);
+      color: #b6bfce;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      border-color: transparent;
+    }
+
+    .right-filters {
+      display: flex;
+      gap: 14px;
+    }
+
+    .date-btn,
+    .filter-btn {
+      height: 44px;
+      border: 1px solid var(--border2);
+      background: rgba(8, 15, 25, .58);
+      color: #aeb8c8;
+      border-radius: 6px;
+      padding: 0 16px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    thead {
+      background: rgba(255,255,255,.025);
+    }
+
+    th {
+      height: 55px;
+      text-align: left;
+      color: #aeb8c8;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 0 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      color: #dbe3ef;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: center;
+    }
+
+    .customer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mini-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #a7b2c3;
+      color: #111827;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .customer strong,
+    .service strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+      color: #e7edf7;
+    }
+
+    .customer span,
+    .service span,
+    .vehicle span,
+    .date span {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .service {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .service-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+    }
+
+    .s-blue { background: rgba(37,99,235,.12); color: #246bff; }
+    .s-green { background: rgba(34,197,94,.12); color: #22c55e; }
+    .s-purple { background: rgba(139,92,246,.12); color: #8b5cf6; }
+    .s-yellow { background: rgba(234,179,8,.14); color: #eab308; }
+    .s-red { background: rgba(239,68,68,.13); color: #ef4444; }
+    .s-gray { background: rgba(148,163,184,.12); color: #94a3b8; }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 9px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .upcoming {
+      color: #3b82f6;
+      background: rgba(37,99,235,.16);
+    }
+
+    .progress {
+      color: #fb8500;
+      background: rgba(251,133,0,.12);
+    }
+
+    .completed {
+      color: #22c55e;
+      background: rgba(34,197,94,.13);
+    }
+
+    .upcoming .dot { background: #3b82f6; }
+    .progress .dot { background: #fb8500; }
+    .completed .dot { background: #22c55e; }
+
+    .actions-row {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      background: rgba(8,15,25,.5);
+      color: #9ca8ba;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+
+    .card-foot {
+      height: 80px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .showing {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pages {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border2);
+      background: rgba(8,15,25,.5);
+      color: #aeb8c8;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-weight: 600;
+    }
+
+    .page.active {
+      background: #1d4ed8;
+      color: white;
+      border-color: transparent;
+    }
+
+    .per-page {
+      height: 40px;
+      border: 1px solid var(--border2);
+      background: rgba(8,15,25,.5);
+      color: #aeb8c8;
+      border-radius: 7px;
+      padding: 0 12px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      font-weight: 600;
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        min-height: auto;
+        padding: 18px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border2);
+      }
+
+      .brand {
+        margin-bottom: 20px;
+      }
+
+      .nav {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .nav a {
+        flex: 0 0 auto;
+        height: 46px;
+      }
+
+      .user {
+        display: none;
+      }
+
+      .top {
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .search {
+        width: 100%;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .card-head {
+        height: auto;
+        padding: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .filters,
+      .right-filters {
+        flex-wrap: wrap;
+      }
+
+      table {
+        min-width: 1050px;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .main {
+        padding: 22px 14px;
+      }
+
+      .brand h1 {
+        font-size: 21px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .stat {
+        height: 100px;
+      }
+
+      .actions {
+        flex-wrap: wrap;
+      }
+
+      .new-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .card-foot {
+        height: auto;
+        padding: 18px;
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .pages {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div>
+        <div class="brand">
+          <div class="logo">
+            <i data-lucide="settings" size="26"></i>
+          </div>
+          <div>
+            <h1>PITSTOP</h1>
+            <span>AUTO SERVICE</span>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <a class="active" href="#"><i data-lucide="calendar-days" size="21"></i>Bookings</a>
+          <a href="#"><i data-lucide="calendar" size="21"></i>Calendar</a>
+          <a href="#"><i data-lucide="users" size="21"></i>Customers</a>
+          <a href="#"><i data-lucide="wrench" size="21"></i>Services</a>
+          <a href="#"><i data-lucide="bar-chart-3" size="21"></i>Reports</a>
+          <a href="#"><i data-lucide="settings" size="21"></i>Settings</a>
+        </nav>
+      </div>
+
+      <div class="user">
+        <div class="avatar">MS</div>
+        <div>
+          <strong>Mike Smith</strong><br>
+          <small>Administrator</small>
+        </div>
+        <i data-lucide="chevron-down" size="18"></i>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <div class="title">
+          <h2>Bookings</h2>
+          <p>Manage and view all customer appointments</p>
+        </div>
+
+        <div class="actions">
+          <div class="search">
+            <i data-lucide="search" size="20"></i>
+            <input type="text" placeholder="Search booking, customer..." />
+            <span class="key">⌘K</span>
+          </div>
+
+          <div class="bell">
+            <i data-lucide="bell" size="23"></i>
+            <span class="badge">3</span>
+          </div>
+
+          <button class="new-btn">
+            <i data-lucide="plus" size="20"></i>
+            New Booking
+          </button>
+        </div>
+      </header>
+
+      <section class="stats">
+        <div class="stat blue">
+          <div class="stat-icon"><i data-lucide="calendar-days"></i></div>
+          <div>
+            <h3>0</h3>
+            <p>Total Bookings<br>Today</p>
+          </div>
+        </div>
+
+        <div class="stat green">
+          <div class="stat-icon"><i data-lucide="clock"></i></div>
+          <div>
+            <h3>8</h3>
+            <p>Upcoming<br>Today</p>
+          </div>
+        </div>
+
+        <div class="stat orange">
+          <div class="stat-icon"><i data-lucide="timer"></i></div>
+          <div>
+            <h3>5</h3>
+            <p>In Progress<br>Today</p>
+          </div>
+        </div>
+
+        <div class="stat purple">
+          <div class="stat-icon"><i data-lucide="check-circle"></i></div>
+          <div>
+            <h3>11</h3>
+            <p>Completed<br>Today</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <div class="filters">
+            <h3>All Bookings</h3>
+            <button class="tab active">All</button>
+            <button class="tab">Upcoming</button>
+            <button class="tab">In Progress</button>
+            <button class="tab">Completed</button>
+            <button class="tab">Cancelled</button>
+          </div>
+
+          <div class="right-filters">
+            <button class="date-btn">
+              <i data-lucide="calendar" size="18"></i>
+              June 18, 2025
+              <i data-lucide="chevron-down" size="17"></i>
+            </button>
+            <button class="filter-btn">
+              <i data-lucide="list-filter" size="18"></i>
+              Filter
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:130px;">Booking ID</th>
+                <th style="width:190px;">Customer</th>
+                <th style="width:230px;">Service</th>
+                <th style="width:165px;">Date & Time</th>
+                <th style="width:160px;">Vehicle</th>
+                <th style="width:150px;">Status</th>
+                <th style="width:100px;">Total</th>
+                <th style="width:140px;">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="bookingsBody">
+  <tr>
+    <td colspan="8">Ładowanie rezerwacji...</td>
+  </tr>
+</tbody>
+          </table>
+        </div>
+
+        <div class="card-foot">
+          <p class="showing">Ładowanie rezerwacji...</p>
+
+          <div class="pages">
+            <button class="page"><i data-lucide="chevron-left" size="18"></i></button>
+            <button class="page active">1</button>
+            <button class="page">2</button>
+            <button class="page">3</button>
+            <button class="page">4</button>
+            <button class="page"><i data-lucide="chevron-right" size="18"></i></button>
+          </div>
+
+          <div class="per-page">
+            6 per page
+            <i data-lucide="chevron-down" size="17"></i>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+ <script>
+  lucide.createIcons();
+
+  const tabs = document.querySelectorAll(".tab");
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+    });
+  });
+
+  document.querySelector(".new-btn").addEventListener("click", () => {
+    window.location.href = "index.html";
+  });
+
+  async function checkLogin() {
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (!data.session) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    loadBookings();
+  }
+
+  async function loadBookings() {
+    const body = document.getElementById("bookingsBody");
+
+    const { data, error } = await supabaseClient
+      .from("reservations")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="8">Błąd pobierania rezerwacji.</td>
+        </tr>
+      `;
+      console.log(error);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      body.innerHTML = `
+        <tr>
+          <td colspan="8">Brak rezerwacji.</td>
+        </tr>
+      `;
+      return;
+    }
+
+    body.innerHTML = "";
+
+    data.forEach((r, index) => {
+      const bookingId = "#BKG-" + String(r.id).padStart(4, "0");
+
+      const serviceName = r.service || "Nie wybrano";
+      const dateValue = r.date || "-";
+      const message = r.message || "";
+      const timeMatch = message.match(/Godzina:\s*([^|]+)/);
+      const timeValue = timeMatch ? timeMatch[1].trim() : "-";
+
+      const car = r.car || "-";
+
+      body.innerHTML += `
+        <tr>
+          <td>${bookingId}</td>
+
+          <td>
+            <div class="customer">
+              <div class="mini-avatar"><i data-lucide="user" size="18"></i></div>
+              <div>
+                <strong>${r.name || "-"}</strong>
+                <span>${r.phone || "-"}</span>
+              </div>
+            </div>
+          </td>
+
+          <td>
+            <div class="service">
+              <div class="service-icon s-blue"><i data-lucide="wrench" size="24"></i></div>
+              <div>
+                <strong>${serviceName}</strong>
+                <span>${message}</span>
+              </div>
+            </div>
+          </td>
+
+          <td class="date">
+            ${dateValue}<br>
+            <span>${timeValue}</span>
+          </td>
+
+          <td class="vehicle">
+            ${car}<br>
+            <span>-</span>
+          </td>
+
+          <td>
+            <span class="status upcoming">
+              <span class="dot"></span>${r.status || "Nowa"}
+            </span>
+          </td>
+
+          <td>-</td>
+
+          <td>
+            <div class="actions-row">
+              <button class="icon-btn" onclick="alert('Telefon: ${r.phone || "-"}')">
+                <i data-lucide="eye" size="17"></i>
+              </button>
+              <button class="icon-btn">
+                <i data-lucide="pencil" size="17"></i>
+              </button>
+              <button class="icon-btn">
+                <i data-lucide="ellipsis" size="17"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+
+    lucide.createIcons();
+
+    document.querySelector(".stat.blue h3").textContent = data.length;
+    document.querySelector(".stat.green h3").textContent = data.filter(r => r.status === "Nowa").length;
+    document.querySelector(".stat.orange h3").textContent = "0";
+    document.querySelector(".stat.purple h3").textContent = "0";
+
+    document.querySelector(".showing").textContent = `Showing 1 to ${data.length} of ${data.length} results`;
+  }
+
+  checkLogin();
+</script>
+</body>
+</html>
