@@ -1,165 +1,589 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>Panel mechanika</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PitStop Login</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #1677ff;
+      --blue2: #0b8cff;
+      --text: #ffffff;
+      --muted: #a6adba;
+      --border: rgba(255,255,255,0.14);
+      --card: rgba(9, 15, 24, 0.72);
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: white;
-      padding: 30px;
+      min-height: 100vh;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 75% 45%, rgba(0, 105, 255, 0.18), transparent 35%),
+        radial-gradient(circle at 25% 35%, rgba(0, 120, 255, 0.13), transparent 35%),
+        #020711;
+      overflow-x: hidden;
     }
 
-    .box {
-      max-width: 900px;
-      margin: auto;
-      background: #1c1c1c;
-      padding: 25px;
-      border-radius: 16px;
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 47% 53%;
+      position: relative;
+      overflow: hidden;
     }
 
-    input, button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
+    .page::after {
+      content: "";
+      position: absolute;
+      right: -160px;
+      top: 0;
+      width: 55%;
+      height: 100%;
+      background:
+        repeating-radial-gradient(circle at right center,
+          rgba(22,119,255,.16) 0px,
+          rgba(22,119,255,.16) 1px,
+          transparent 2px,
+          transparent 20px);
+      opacity: .45;
+      pointer-events: none;
+    }
+
+    .left {
+      position: relative;
+      padding: 70px 70px;
+      display: flex;
+      align-items: flex-end;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(2,7,17,.25), rgba(2,7,17,.72)),
+        linear-gradient(0deg, rgba(2,7,17,.95), rgba(2,7,17,.15) 48%, rgba(2,7,17,.85)),
+        url("https://images.unsplash.com/photo-1613214149922-f1809c99b414?auto=format&fit=crop&w=1400&q=80");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .left::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(2,7,17,.2), rgba(2,7,17,.65)),
+        radial-gradient(circle at 35% 40%, transparent 0 28%, rgba(2,7,17,.8) 72%);
+    }
+
+    .left-content {
+      position: relative;
+      z-index: 2;
+      max-width: 520px;
+      padding-bottom: 40px;
+    }
+
+    .eyebrow {
+      color: var(--blue2);
+      font-weight: 800;
+      letter-spacing: 4px;
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
+
+    .left h1 {
+      font-size: clamp(36px, 4vw, 55px);
+      line-height: 1.12;
+      letter-spacing: -1.8px;
+      margin-bottom: 24px;
+      font-weight: 800;
+    }
+
+    .line {
+      width: 78px;
+      height: 5px;
+      background: var(--blue);
       border-radius: 10px;
-      border: none;
+      margin-bottom: 28px;
+      box-shadow: 0 0 22px rgba(22,119,255,.85);
+    }
+
+    .left p {
+      color: #b5bdca;
+      font-size: 19px;
+      line-height: 1.55;
+      max-width: 450px;
+      margin-bottom: 42px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 42px;
+      max-width: 520px;
+    }
+
+    .feature {
+      text-align: center;
+      color: #aeb6c3;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .iconbox {
+      width: 58px;
+      height: 58px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 16px;
+      background: rgba(7, 15, 28, .65);
+      box-shadow: inset 0 0 20px rgba(255,255,255,.03);
+    }
+
+    .iconbox i {
+      color: var(--blue);
+      width: 27px;
+      height: 27px;
+      filter: drop-shadow(0 0 10px rgba(22,119,255,.6));
+    }
+
+    .right {
+      position: relative;
+      z-index: 3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 55px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 610px;
+      min-height: 720px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 18px;
+      background:
+        linear-gradient(145deg, rgba(10,17,28,.86), rgba(4,10,19,.80));
+      box-shadow:
+        0 35px 90px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.04);
+      backdrop-filter: blur(18px);
+      padding: 70px 62px 55px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 17px;
+      margin-bottom: 38px;
+    }
+
+    .gear {
+      width: 72px;
+      height: 72px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+    }
+
+    .brand-main {
+      font-size: 37px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .brand-main span {
+      color: var(--blue);
+    }
+
+    .brand-sub {
+      color: #aab2bf;
+      letter-spacing: 7px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .welcome {
+      text-align: center;
+      margin-bottom: 38px;
+    }
+
+    .welcome h2 {
+      font-size: 26px;
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    .welcome p {
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .field {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      color: #e7eaf0;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .input-wrap {
+      height: 58px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      background: rgba(4,10,18,.55);
+      transition: .25s ease;
+    }
+
+    .input-wrap:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 1px rgba(22,119,255,.55), 0 0 25px rgba(22,119,255,.25);
+    }
+
+    .input-wrap i {
+      color: #90a0b5;
+      width: 23px;
+      height: 23px;
+      margin-right: 15px;
+    }
+
+    input {
+      flex: 1;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: white;
+      font-size: 16px;
+      font-family: inherit;
+    }
+
+    input::placeholder {
+      color: #8e96a3;
+    }
+
+    .eye {
+      background: none;
+      border: 0;
+      color: #9aa5b6;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 18px 0 35px;
+      color: #d5dae2;
+      font-size: 15px;
+    }
+
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .check input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--blue);
+    }
+
+    .forgot {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .btn {
+      width: 100%;
+      height: 62px;
+      border-radius: 8px;
+      border: 0;
+      background: linear-gradient(180deg, #1d8bff, #1268ea);
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 20px 45px rgba(22,119,255,.28);
+      transition: .25s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 55px rgba(22,119,255,.42);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: #a2aab8;
+      margin: 42px 0 35px;
       font-size: 16px;
     }
 
-    button {
-      background: #e6332a;
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,.14);
+    }
+
+    .secure {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      color: #b4bdca;
+    }
+
+    .secure-icon {
+      color: var(--blue);
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+    }
+
+    .secure strong {
+      display: block;
       color: white;
-      font-weight: bold;
-      cursor: pointer;
+      margin-bottom: 7px;
+      font-size: 16px;
     }
 
-    .reservation {
-      background: #2a2a2a;
-      padding: 18px;
-      border-radius: 12px;
-      margin-top: 15px;
+    .secure p {
+      font-size: 14px;
+      line-height: 1.45;
     }
 
-    .hidden {
-      display: none;
+    @media (max-width: 1000px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .left {
+        min-height: 560px;
+        padding: 45px 24px;
+      }
+
+      .right {
+        min-height: auto;
+        padding: 35px 18px 55px;
+      }
+
+      .login-card {
+        min-height: auto;
+        padding: 42px 24px;
+      }
+
+      .features {
+        gap: 18px;
+      }
     }
 
-    .small-btn {
-      width: auto;
-      padding: 10px 14px;
-      margin-right: 8px;
-      margin-top: 10px;
-      background: #333;
+    @media (max-width: 560px) {
+      .left {
+        min-height: 520px;
+        align-items: flex-end;
+      }
+
+      .left h1 {
+        font-size: 34px;
+      }
+
+      .left p {
+        font-size: 15px;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .feature {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        gap: 14px;
+      }
+
+      .iconbox {
+        margin: 0;
+        width: 50px;
+        height: 50px;
+        flex: 0 0 auto;
+      }
+
+      .logo {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .brand-main {
+        font-size: 30px;
+        text-align: center;
+      }
+
+      .brand-sub {
+        text-align: center;
+        letter-spacing: 5px;
+      }
+
+      .row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
     }
   </style>
 </head>
+
 <body>
+  <main class="page">
+    <section class="left">
+      <div class="left-content">
+        <div class="eyebrow">PITSTOP AUTO SERVICE</div>
+        <h1>Powering Every<br>Smooth Journey</h1>
+        <div class="line"></div>
+        <p>Manage services, customers, and your workshop operations seamlessly.</p>
 
-  <div class="box" id="loginBox">
-    <h1>Logowanie mechanika</h1>
-
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Hasło">
-
-    <button onclick="login()">Zaloguj</button>
-
-    <p id="loginMsg"></p>
-  </div>
-
-  <div class="box hidden" id="panelBox">
-    <h1>Panel rezerwacji</h1>
-    <button onclick="logout()">Wyloguj</button>
-
-    <div id="reservations"></div>
-  </div>
-
-  <script>
-    async function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const loginMsg = document.getElementById("loginMsg");
-
-      const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-
-      if (error) {
-        loginMsg.textContent = "Błędny email lub hasło.";
-        loginMsg.style.color = "red";
-        console.log(error);
-        return;
-      }
-
-      showPanel();
-    }
-
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      document.getElementById("loginBox").classList.remove("hidden");
-      document.getElementById("panelBox").classList.add("hidden");
-    }
-
-    async function showPanel() {
-      document.getElementById("loginBox").classList.add("hidden");
-      document.getElementById("panelBox").classList.remove("hidden");
-      loadReservations();
-    }
-
-    async function loadReservations() {
-      const container = document.getElementById("reservations");
-      container.innerHTML = "Ładowanie...";
-
-      const { data, error } = await supabaseClient
-        .from("reservations")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        container.innerHTML = "Błąd pobierania rezerwacji.";
-        console.log(error);
-        return;
-      }
-
-      if (data.length === 0) {
-        container.innerHTML = "<p>Brak rezerwacji.</p>";
-        return;
-      }
-
-      container.innerHTML = "";
-
-      data.forEach(r => {
-        container.innerHTML += `
-          <div class="reservation">
-            <h3>${r.name}</h3>
-            <p><b>Telefon:</b> ${r.phone}</p>
-            <p><b>Auto:</b> ${r.car || "-"}</p>
-            <p><b>Usługa:</b> ${r.service || "-"}</p>
-            <p><b>Data:</b> ${r.date || "-"}</p>
-            <p><b>Opis:</b> ${r.message || "-"}</p>
-            <p><b>Status:</b> ${r.status}</p>
+        <div class="features">
+          <div class="feature">
+            <div class="iconbox"><i data-lucide="shield-check"></i></div>
+            <span>Secure<br>& Reliable</span>
           </div>
-        `;
-      });
+
+          <div class="feature">
+            <div class="iconbox"><i data-lucide="gauge"></i></div>
+            <span>Built for<br>Automotive Pros</span>
+          </div>
+
+          <div class="feature">
+            <div class="iconbox"><i data-lucide="wrench"></i></div>
+            <span>All-in-One<br>Management</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="login-card">
+        <div class="logo">
+          <div class="gear">
+            <i data-lucide="settings" style="width:70px;height:70px;"></i>
+          </div>
+          <div>
+            <div class="brand-main">PIT<span>STOP</span></div>
+            <div class="brand-sub">AUTO SERVICE</div>
+          </div>
+        </div>
+
+        <div class="welcome">
+          <h2>Welcome back</h2>
+          <p>Login to continue to your account</p>
+        </div>
+
+        <form>
+          <div class="field">
+            <label>Email or Username</label>
+            <div class="input-wrap">
+              <i data-lucide="user"></i>
+              <input id="email" type="email" placeholder="Enter your email">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Password</label>
+            <div class="input-wrap">
+              <i data-lucide="lock"></i>
+              <input id="password" type="password" placeholder="Enter your password">
+              <button class="eye" type="button" onclick="togglePassword()">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="row">
+            <label class="check">
+              <input type="checkbox" checked>
+              Remember me
+            </label>
+            <a href="#" class="forgot">Forgot password?</a>
+          </div>
+
+          <button class="btn" type="button" onclick="login()">Login</button>
+<p id="loginMsg" style="margin-top:16px;color:#ff6b6b;text-align:center;font-weight:700;"></p>
+
+          <div class="divider">or</div>
+
+          <div class="secure">
+            <i class="secure-icon" data-lucide="shield-check"></i>
+            <div>
+              <strong>Secure Login</strong>
+              <p>Your data is protected with 256-bit encryption</p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+    <script>
+  lucide.createIcons();
+
+  function togglePassword() {
+    const input = document.getElementById("password");
+    input.type = input.type === "password" ? "text" : "password";
+  }
+
+  async function login() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const loginMsg = document.getElementById("loginMsg");
+
+    if (!email || !password) {
+      loginMsg.textContent = "Wpisz email i hasło.";
+      return;
     }
 
-    async function checkSession() {
-      const { data } = await supabaseClient.auth.getSession();
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
 
-      if (data.session) {
-        showPanel();
-      }
+    if (error) {
+      loginMsg.textContent = "Błędny email lub hasło.";
+      console.log(error);
+      return;
     }
 
-    checkSession();
-  </script>
-
+    window.location.href = "panel.html";
+  }
+</script>
 </body>
 </html>
