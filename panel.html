@@ -1,14 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PitStop Auto Service - Bookings</title>
+  <title>Prime Auto Care — Panel mechanika</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     * {
@@ -18,663 +16,530 @@
     }
 
     :root {
-      --bg: #07101a;
-      --panel: rgba(15, 24, 36, .82);
-      --panel2: rgba(13, 22, 34, .92);
-      --border: rgba(255,255,255,.09);
-      --border2: rgba(255,255,255,.13);
-      --text: #f4f7fb;
-      --muted: #96a1b4;
-      --blue: #246bff;
-      --blue2: #0b5cff;
-      --green: #22c55e;
-      --orange: #fb8500;
-      --purple: #8b5cf6;
+      --bg: #eef3fb;
+      --panel: rgba(255,255,255,.82);
+      --white: #ffffff;
+      --text: #17213d;
+      --muted: #66708a;
+      --muted2: #9aa4b8;
+      --border: #e4eaf4;
+      --blue: #2378ff;
+      --blue2: #6f3cff;
+      --soft-blue: #edf4ff;
+      --green: #12b981;
+      --orange: #f59e0b;
       --red: #ef4444;
+      --shadow: 0 18px 50px rgba(32, 66, 140, .12);
+      --shadow2: 0 10px 28px rgba(32, 66, 140, .10);
+      --radius: 22px;
     }
 
     body {
       min-height: 100vh;
-      font-family: "Inter", sans-serif;
-      background:
-        radial-gradient(circle at 20% 0%, rgba(37,99,235,.13), transparent 28%),
-        radial-gradient(circle at 80% 15%, rgba(59,130,246,.08), transparent 30%),
-        linear-gradient(135deg, #050b12, #07111c 55%, #050a10);
+      font-family: 'Inter', sans-serif;
       color: var(--text);
-      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(35,120,255,.15), transparent 30%),
+        radial-gradient(circle at 90% 12%, rgba(111,60,255,.12), transparent 32%),
+        linear-gradient(135deg, #f7faff 0%, #eef3fb 100%);
+      padding: 28px;
     }
 
     .app {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 250px 1fr;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      overflow: hidden;
-      background: rgba(4,10,17,.45);
+      max-width: 1420px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.58);
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      backdrop-filter: blur(14px);
     }
 
-    /* SIDEBAR */
-
-    .sidebar {
-      padding: 32px 16px;
-      border-right: 1px solid var(--border2);
-      background: rgba(5, 13, 22, .76);
+    .topbar {
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
-      min-height: 100vh;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 24px;
     }
 
     .brand {
       display: flex;
-      gap: 12px;
       align-items: center;
-      margin-bottom: 42px;
-      padding: 0 16px;
+      gap: 16px;
     }
 
     .logo {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: #155cff;
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
       display: grid;
       place-items: center;
-      box-shadow: 0 0 30px rgba(36,107,255,.35);
+      color: white;
+      box-shadow: 0 12px 28px rgba(35,120,255,.28);
+    }
+
+    .logo svg {
+      width: 29px;
+      height: 29px;
     }
 
     .brand h1 {
-      font-size: 26px;
-      line-height: 1;
-      letter-spacing: -.7px;
-      font-weight: 900;
+      font-size: 25px;
+      line-height: 1.1;
+      letter-spacing: -.03em;
     }
 
-    .brand span {
+    .brand p {
+      margin-top: 6px;
       color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .8px;
-    }
-
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 13px;
-    }
-
-    .nav a {
-      height: 58px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 0 18px;
-      border-radius: 8px;
-      color: #aab4c6;
-      text-decoration: none;
-      font-weight: 600;
       font-size: 15px;
-      transition: .2s;
     }
 
-    .nav a.active {
-      background: linear-gradient(135deg, rgba(37,99,235,.95), rgba(22,58,138,.8));
-      color: white;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-
-    .nav a:hover {
-      background: rgba(255,255,255,.05);
-      color: white;
-    }
-
-    .user {
-      height: 72px;
-      padding: 0 16px;
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      background: rgba(15, 27, 42, .75);
+    .secure {
       display: flex;
       align-items: center;
       gap: 12px;
+      background: rgba(255,255,255,.78);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 14px 18px;
+      box-shadow: var(--shadow2);
     }
 
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #cbd5e1;
-      color: #1e293b;
+    .secure-icon {
+      width: 37px;
+      height: 37px;
+      border-radius: 12px;
+      background: var(--soft-blue);
       display: grid;
       place-items: center;
-      font-weight: 700;
+      color: var(--blue);
     }
 
-    .user strong {
+    .secure strong {
+      display: block;
       font-size: 14px;
+      margin-bottom: 3px;
     }
 
-    .user small {
-      color: var(--muted);
+    .secure span {
       font-size: 13px;
-    }
-
-    .user i {
-      margin-left: auto;
       color: var(--muted);
     }
 
-    /* MAIN */
-
-    .main {
-      padding: 34px 24px 36px 30px;
+    .header-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow2);
+      margin-bottom: 18px;
     }
 
-    .top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-
-    .title h2 {
-      font-size: 27px;
-      letter-spacing: -.6px;
+    .header-card h2 {
+      font-size: 22px;
+      letter-spacing: -.03em;
       margin-bottom: 8px;
     }
 
-    .title p {
+    .header-card p {
       color: var(--muted);
       font-size: 15px;
+      line-height: 1.6;
     }
-
-    .actions {
-      display: flex;
-      gap: 18px;
-      align-items: center;
-    }
-
-    .search {
-      width: 380px;
-      height: 50px;
-      border-radius: 7px;
-      border: 1px solid var(--border2);
-      background: rgba(8, 15, 25, .8);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 0 14px;
-      color: var(--muted);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
-    }
-
-    .search input {
-      flex: 1;
-      background: none;
-      border: 0;
-      outline: 0;
-      color: white;
-      font-size: 14px;
-    }
-
-    .key {
-      padding: 4px 8px;
-      background: rgba(255,255,255,.08);
-      border-radius: 5px;
-      font-size: 12px;
-      color: #aeb8c8;
-    }
-
-    .bell {
-      position: relative;
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-    }
-
-    .badge {
-      position: absolute;
-      top: 0;
-      right: 2px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--blue);
-      font-size: 11px;
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-    }
-
-    .new-btn {
-      height: 50px;
-      border: 0;
-      border-radius: 7px;
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-      font-weight: 700;
-      padding: 0 20px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      cursor: pointer;
-      box-shadow: 0 12px 30px rgba(37,99,235,.22);
-    }
-
-    /* STATS */
 
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 24px;
-      margin-bottom: 24px;
+      gap: 14px;
+      margin-bottom: 18px;
     }
 
     .stat {
-      height: 118px;
-      border: 1px solid var(--border2);
-      background: linear-gradient(145deg, rgba(17, 30, 45, .8), rgba(9, 16, 27, .78));
-      border-radius: 7px;
-      display: flex;
-      align-items: center;
-      gap: 28px;
-      padding: 0 30px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      background: rgba(255,255,255,.76);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 26px rgba(32,66,140,.08);
     }
 
-    .stat-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-    }
-
-    .stat.blue .stat-icon { background: rgba(37,99,235,.18); color: #2f7bff; }
-    .stat.green .stat-icon { background: rgba(34,197,94,.16); color: var(--green); }
-    .stat.orange .stat-icon { background: rgba(251,133,0,.15); color: var(--orange); }
-    .stat.purple .stat-icon { background: rgba(139,92,246,.16); color: var(--purple); }
-
-    .stat h3 {
-      font-size: 27px;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-
-    .stat p {
+    .stat span {
       color: var(--muted);
-      font-size: 15px;
-      line-height: 1.45;
-    }
-
-    /* TABLE CARD */
-
-    .card {
-      border: 1px solid var(--border2);
-      border-radius: 8px;
-      background: rgba(12, 22, 35, .8);
-      overflow: hidden;
-      box-shadow: 0 20px 50px rgba(0,0,0,.18);
-    }
-
-    .card-head {
-      height: 84px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .filters {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-head h3 {
-      font-size: 17px;
-    }
-
-    .tab {
-      height: 38px;
-      padding: 0 16px;
-      border-radius: 6px;
-      border: 1px solid var(--border2);
-      background: rgba(8, 15, 25, .55);
-      color: #b6bfce;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .tab.active {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: white;
-      border-color: transparent;
-    }
-
-    .right-filters {
-      display: flex;
-      gap: 14px;
-    }
-
-    .date-btn,
-    .filter-btn {
-      height: 44px;
-      border: 1px solid var(--border2);
-      background: rgba(8, 15, 25, .58);
-      color: #aeb8c8;
-      border-radius: 6px;
-      padding: 0 16px;
-      display: flex;
-      gap: 12px;
-      align-items: center;
+      font-size: 13px;
       font-weight: 600;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    thead {
-      background: rgba(255,255,255,.025);
-    }
-
-    th {
-      height: 55px;
-      text-align: left;
-      color: #aeb8c8;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 0 22px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    td {
-      padding: 20px 22px;
-      border-bottom: 1px solid var(--border);
-      color: #dbe3ef;
-      font-size: 14px;
-      vertical-align: middle;
-    }
-
-    th:last-child,
-    td:last-child {
-      text-align: center;
-    }
-
-    .customer {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .mini-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #a7b2c3;
-      color: #111827;
-      display: grid;
-      place-items: center;
-      flex: 0 0 auto;
-    }
-
-    .customer strong,
-    .service strong {
+    .stat strong {
       display: block;
-      font-size: 14px;
-      margin-bottom: 5px;
-      color: #e7edf7;
+      margin-top: 7px;
+      font-size: 25px;
+      letter-spacing: -.04em;
     }
 
-    .customer span,
-    .service span,
-    .vehicle span,
-    .date span {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .service {
+    .jobs {
       display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .job-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      box-shadow: var(--shadow2);
+      overflow: hidden;
+    }
+
+    .job-top {
+      padding: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .job-title {
+      display: flex;
+      gap: 15px;
       align-items: center;
-      gap: 14px;
     }
 
     .service-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 13px;
+      min-width: 54px;
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #eef4ff, #e9edff);
+      color: var(--blue);
       display: grid;
       place-items: center;
-      flex: 0 0 auto;
+      box-shadow: inset 0 0 0 1px rgba(35,120,255,.08);
     }
 
-    .s-blue { background: rgba(37,99,235,.12); color: #246bff; }
-    .s-green { background: rgba(34,197,94,.12); color: #22c55e; }
-    .s-purple { background: rgba(139,92,246,.12); color: #8b5cf6; }
-    .s-yellow { background: rgba(234,179,8,.14); color: #eab308; }
-    .s-red { background: rgba(239,68,68,.13); color: #ef4444; }
-    .s-gray { background: rgba(148,163,184,.12); color: #94a3b8; }
+    .service-icon svg {
+      width: 29px;
+      height: 29px;
+    }
+
+    .job-title h3 {
+      font-size: 20px;
+      letter-spacing: -.03em;
+      margin-bottom: 5px;
+    }
+
+    .job-title p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
 
     .status {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 6px 9px;
-      border-radius: 5px;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 9px 13px;
       font-size: 13px;
       font-weight: 700;
+      white-space: nowrap;
     }
 
-    .dot {
-      width: 7px;
-      height: 7px;
+    .status::before {
+      content: "";
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
     }
 
-    .upcoming {
-      color: #3b82f6;
-      background: rgba(37,99,235,.16);
+    .status.waiting {
+      color: #b56a00;
+      background: #fff6df;
     }
 
-    .progress {
-      color: #fb8500;
-      background: rgba(251,133,0,.12);
+    .status.waiting::before {
+      background: var(--orange);
     }
 
-    .completed {
-      color: #22c55e;
-      background: rgba(34,197,94,.13);
+    .status.progress {
+      color: #1769ff;
+      background: #edf4ff;
     }
 
-    .upcoming .dot { background: #3b82f6; }
-    .progress .dot { background: #fb8500; }
-    .completed .dot { background: #22c55e; }
-
-    .actions-row {
-      display: flex;
-      justify-content: center;
-      gap: 7px;
+    .status.progress::before {
+      background: var(--blue);
     }
 
-    .icon-btn {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      background: rgba(8,15,25,.5);
-      color: #9ca8ba;
+    .status.done {
+      color: #0d8a61;
+      background: #e9fbf4;
+    }
+
+    .status.done::before {
+      background: var(--green);
+    }
+
+    .job-body {
       display: grid;
-      place-items: center;
-      cursor: pointer;
+      grid-template-columns: 1.35fr .85fr;
+      gap: 20px;
+      padding: 22px;
     }
 
-    .card-foot {
-      height: 80px;
-      padding: 0 22px;
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .info-box {
+      background: rgba(255,255,255,.72);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      padding: 15px;
+    }
+
+    .info-box.full {
+      grid-column: 1 / -1;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .value {
+      font-size: 15px;
+      font-weight: 650;
+      color: var(--text);
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .muted-value {
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .summary {
+      background: rgba(255,255,255,.80);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .summary h4 {
+      font-size: 17px;
+      margin-bottom: 15px;
+      letter-spacing: -.02em;
+    }
+
+    .sum-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-    }
-
-    .showing {
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
       color: var(--muted);
       font-size: 14px;
     }
 
-    .pages {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .sum-row strong {
+      color: var(--text);
     }
 
-    .page {
-      width: 40px;
-      height: 40px;
-      border: 1px solid var(--border2);
-      background: rgba(8,15,25,.5);
-      color: #aeb8c8;
-      border-radius: 7px;
+    .sum-row.total {
+      border-bottom: 0;
+      padding-top: 15px;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .sum-row.total strong {
+      color: var(--blue);
+      font-size: 21px;
+    }
+
+    .notify {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: linear-gradient(135deg, #edf4ff, #f4f1ff);
+      border: 1px solid #e3eaff;
+      border-radius: 16px;
+      padding: 13px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .check {
+      min-width: 21px;
+      width: 21px;
+      height: 21px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
       display: grid;
       place-items: center;
-      font-weight: 600;
-    }
-
-    .page.active {
-      background: #1d4ed8;
       color: white;
-      border-color: transparent;
+      font-size: 14px;
+      font-weight: 800;
     }
 
-    .per-page {
-      height: 40px;
-      border: 1px solid var(--border2);
-      background: rgba(8,15,25,.5);
-      color: #aeb8c8;
-      border-radius: 7px;
-      padding: 0 12px 0 16px;
+    .check.no {
+      background: #d8deea;
+      color: #74809a;
+    }
+
+    .actions {
+      padding: 0 22px 22px;
       display: flex;
-      align-items: center;
-      gap: 26px;
-      font-weight: 600;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    /* MOBILE */
+    button {
+      border: 0;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 750;
+      border-radius: 14px;
+      padding: 13px 17px;
+      transition: .2s ease;
+      font-size: 14px;
+    }
 
-    @media (max-width: 1100px) {
-      .app {
-        grid-template-columns: 1fr;
-      }
+    .btn-start {
+      color: white;
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      box-shadow: 0 12px 24px rgba(35,120,255,.22);
+    }
 
-      .sidebar {
-        min-height: auto;
-        padding: 18px;
-        border-right: 0;
-        border-bottom: 1px solid var(--border2);
-      }
+    .btn-finish {
+      color: white;
+      background: linear-gradient(135deg, #12b981, #059669);
+      box-shadow: 0 12px 24px rgba(18,185,129,.18);
+    }
 
-      .brand {
-        margin-bottom: 20px;
-      }
+    .btn-cancel {
+      color: #d82e2e;
+      background: #fff0f0;
+      border: 1px solid #ffd5d5;
+    }
 
-      .nav {
-        flex-direction: row;
-        overflow-x: auto;
-        padding-bottom: 8px;
-      }
+    button:hover {
+      transform: translateY(-2px);
+    }
 
-      .nav a {
-        flex: 0 0 auto;
-        height: 46px;
-      }
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-      .user {
-        display: none;
-      }
+    .empty {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      box-shadow: var(--shadow2);
+      min-height: 360px;
+      display: none;
+      place-items: center;
+      text-align: center;
+      padding: 40px;
+    }
 
-      .top {
-        flex-direction: column;
-      }
+    .empty-icon {
+      width: 76px;
+      height: 76px;
+      border-radius: 22px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      color: var(--blue);
+      background: linear-gradient(135deg, #edf4ff, #f4f1ff);
+    }
 
-      .actions {
-        width: 100%;
-      }
+    .empty h2 {
+      font-size: 25px;
+      margin-bottom: 8px;
+      letter-spacing: -.03em;
+    }
 
-      .search {
-        width: 100%;
-      }
+    .empty p {
+      color: var(--muted);
+      font-size: 15px;
+    }
 
+    @media (max-width: 1050px) {
       .stats {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .card-head {
-        height: auto;
-        padding: 18px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-
-      .filters,
-      .right-filters {
-        flex-wrap: wrap;
-      }
-
-      table {
-        min-width: 1050px;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
+      .job-body {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 650px) {
-      .main {
-        padding: 22px 14px;
+    @media (max-width: 720px) {
+      body {
+        padding: 12px;
+      }
+
+      .app {
+        padding: 16px;
+        border-radius: 24px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .secure {
+        width: 100%;
       }
 
       .brand h1 {
-        font-size: 21px;
+        font-size: 22px;
+      }
+
+      .brand p {
+        font-size: 14px;
+      }
+
+      .header-card {
+        padding: 18px;
       }
 
       .stats {
         grid-template-columns: 1fr;
-        gap: 14px;
       }
 
-      .stat {
-        height: 100px;
+      .job-top {
+        flex-direction: column;
+      }
+
+      .details {
+        grid-template-columns: 1fr;
       }
 
       .actions {
-        flex-wrap: wrap;
-      }
-
-      .new-btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .card-foot {
-        height: auto;
-        padding: 18px;
         flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
       }
 
-      .pages {
-        flex-wrap: wrap;
+      button {
+        width: 100%;
       }
     }
   </style>
@@ -682,304 +547,338 @@
 
 <body>
   <div class="app">
-
-    <aside class="sidebar">
-      <div>
-        <div class="brand">
-          <div class="logo">
-            <i data-lucide="settings" size="26"></i>
-          </div>
-          <div>
-            <h1>PITSTOP</h1>
-            <span>AUTO SERVICE</span>
-          </div>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M14.7 6.3a4.2 4.2 0 0 0-5.44 5.44L3.7 17.3a2.12 2.12 0 0 0 3 3l5.56-5.56A4.2 4.2 0 0 0 17.7 9.3l-2.8 2.8-3-3 2.8-2.8Z" fill="currentColor"/>
+          </svg>
         </div>
-
-        <nav class="nav">
-          <a class="active" href="#"><i data-lucide="calendar-days" size="21"></i>Bookings</a>
-          <a href="#"><i data-lucide="calendar" size="21"></i>Calendar</a>
-          <a href="#"><i data-lucide="users" size="21"></i>Customers</a>
-          <a href="#"><i data-lucide="wrench" size="21"></i>Services</a>
-          <a href="#"><i data-lucide="bar-chart-3" size="21"></i>Reports</a>
-          <a href="#"><i data-lucide="settings" size="21"></i>Settings</a>
-        </nav>
-      </div>
-
-      <div class="user">
-        <div class="avatar">MS</div>
         <div>
-          <strong>Mike Smith</strong><br>
-          <small>Administrator</small>
+          <h1>Prime Auto Care</h1>
+          <p>Panel mechanika — zarządzanie rezerwacjami</p>
         </div>
-        <i data-lucide="chevron-down" size="18"></i>
       </div>
-    </aside>
 
-    <main class="main">
-      <header class="top">
-        <div class="title">
-          <h2>Bookings</h2>
-          <p>Manage and view all customer appointments</p>
+      <div class="secure">
+        <div class="secure-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3l8 3v6c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V6l8-3Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M8.5 12.2l2.2 2.2 4.8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
         </div>
-
-        <div class="actions">
-          <div class="search">
-            <i data-lucide="search" size="20"></i>
-            <input type="text" placeholder="Search booking, customer..." />
-            <span class="key">⌘K</span>
-          </div>
-
-          <div class="bell">
-            <i data-lucide="bell" size="23"></i>
-            <span class="badge">3</span>
-          </div>
-
-          <button class="new-btn">
-            <i data-lucide="plus" size="20"></i>
-            New Booking
-          </button>
+        <div>
+          <strong>Bezpieczny panel</strong>
+          <span>Dane klientów są chronione</span>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <section class="stats">
-        <div class="stat blue">
-          <div class="stat-icon"><i data-lucide="calendar-days"></i></div>
-          <div>
-            <h3>0</h3>
-            <p>Total Bookings<br>Today</p>
+    <section class="header-card">
+      <h2>Lista zleceń</h2>
+      <p>Wszystkie rezerwacje zawierają dokładnie te dane, które klient wybiera lub uzupełnia w panelu rezerwacji.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <span>Wszystkie zlecenia</span>
+        <strong id="allCount">0</strong>
+      </div>
+      <div class="stat">
+        <span>Oczekuje</span>
+        <strong id="waitingCount">0</strong>
+      </div>
+      <div class="stat">
+        <span>W trakcie</span>
+        <strong id="progressCount">0</strong>
+      </div>
+      <div class="stat">
+        <span>Łączna wartość</span>
+        <strong id="totalValue">0,00 zł</strong>
+      </div>
+    </section>
+
+    <main>
+      <div id="jobs" class="jobs"></div>
+
+      <div id="emptyState" class="empty">
+        <div>
+          <div class="empty-icon">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+              <path d="M8 6V4h8v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M5 7h14v13H5V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M8 11h8M8 15h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
           </div>
+          <h2>Brak zleceń</h2>
+          <p>Nowe rezerwacje pojawią się tutaj</p>
         </div>
-
-        <div class="stat green">
-          <div class="stat-icon"><i data-lucide="clock"></i></div>
-          <div>
-            <h3>8</h3>
-            <p>Upcoming<br>Today</p>
-          </div>
-        </div>
-
-        <div class="stat orange">
-          <div class="stat-icon"><i data-lucide="timer"></i></div>
-          <div>
-            <h3>5</h3>
-            <p>In Progress<br>Today</p>
-          </div>
-        </div>
-
-        <div class="stat purple">
-          <div class="stat-icon"><i data-lucide="check-circle"></i></div>
-          <div>
-            <h3>11</h3>
-            <p>Completed<br>Today</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <div class="filters">
-            <h3>All Bookings</h3>
-            <button class="tab active">All</button>
-            <button class="tab">Upcoming</button>
-            <button class="tab">In Progress</button>
-            <button class="tab">Completed</button>
-            <button class="tab">Cancelled</button>
-          </div>
-
-          <div class="right-filters">
-            <button class="date-btn">
-              <i data-lucide="calendar" size="18"></i>
-              June 18, 2025
-              <i data-lucide="chevron-down" size="17"></i>
-            </button>
-            <button class="filter-btn">
-              <i data-lucide="list-filter" size="18"></i>
-              Filter
-            </button>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:130px;">Booking ID</th>
-                <th style="width:190px;">Customer</th>
-                <th style="width:230px;">Service</th>
-                <th style="width:165px;">Date & Time</th>
-                <th style="width:160px;">Vehicle</th>
-                <th style="width:150px;">Status</th>
-                <th style="width:100px;">Total</th>
-                <th style="width:140px;">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody id="bookingsBody">
-  <tr>
-    <td colspan="8">Ładowanie rezerwacji...</td>
-  </tr>
-</tbody>
-          </table>
-        </div>
-
-        <div class="card-foot">
-          <p class="showing">Ładowanie rezerwacji...</p>
-
-          <div class="pages">
-            <button class="page"><i data-lucide="chevron-left" size="18"></i></button>
-            <button class="page active">1</button>
-            <button class="page">2</button>
-            <button class="page">3</button>
-            <button class="page">4</button>
-            <button class="page"><i data-lucide="chevron-right" size="18"></i></button>
-          </div>
-
-          <div class="per-page">
-            6 per page
-            <i data-lucide="chevron-down" size="17"></i>
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
   </div>
 
- <script>
-  lucide.createIcons();
+  <script>
+    const services = {
+      general: {
+        name: "Serwis ogólny",
+        description: "Przegląd i podstawowa konserwacja",
+        price: 129
+      },
+      brakes: {
+        name: "Hamulce",
+        description: "Kontrola i wymiana klocków / tarcz",
+        price: 149
+      },
+      engine: {
+        name: "Diagnostyka silnika",
+        description: "Pełna diagnostyka komputerowa",
+        price: 99
+      },
+      ac: {
+        name: "Klimatyzacja",
+        description: "Dezynfekcja i nabijanie klimatyzacji",
+        price: 119
+      },
+      tires: {
+        name: "Opony",
+        description: "Wymiana i wyważanie opon",
+        price: 89
+      }
+    };
 
-  const tabs = document.querySelectorAll(".tab");
+    let reservations = [];
 
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-    });
-  });
+    const jobsEl = document.getElementById("jobs");
+    const emptyEl = document.getElementById("emptyState");
 
-  document.querySelector(".new-btn").addEventListener("click", () => {
-    window.location.href = "index.html";
-  });
-
-  async function checkLogin() {
-    const { data } = await supabaseClient.auth.getSession();
-
-    if (!data.session) {
-      window.location.href = "login.html";
-      return;
+    function formatMoney(value) {
+      return value.toLocaleString("pl-PL", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }) + " zł";
     }
 
-    loadBookings();
-  }
+    function calculateSummary(price) {
+      const fee = 10;
+      const vat = price * 0.23;
+      const total = price + fee + vat;
 
-  async function loadBookings() {
-    const body = document.getElementById("bookingsBody");
+      return {
+        price,
+        fee,
+        vat,
+        total
+      };
+    }
 
-    const { data, error } = await supabaseClient
-      .from("reservations")
-      .select("*")
-      .order("created_at", { ascending: false });
+    function statusClass(status) {
+      if (status === "W trakcie") return "progress";
+      if (status === "Zakończone") return "done";
+      return "waiting";
+    }
 
-    if (error) {
-      body.innerHTML = `
-        <tr>
-          <td colspan="8">Błąd pobierania rezerwacji.</td>
-        </tr>
+    function serviceIcon() {
+      return `
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3 12h3l2-5h7l2 5h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 12h10l-1 5H8l-1-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M8 18h.01M16 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <path d="M14 7l2-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       `;
-      console.log(error);
-      return;
     }
 
-    if (!data || data.length === 0) {
-      body.innerHTML = `
-        <tr>
-          <td colspan="8">Brak rezerwacji.</td>
-        </tr>
-      `;
-      return;
+    function renderStats() {
+      const all = reservations.length;
+      const waiting = reservations.filter(r => r.status === "Oczekuje").length;
+      const progress = reservations.filter(r => r.status === "W trakcie").length;
+      const total = reservations.reduce((sum, r) => {
+        return sum + calculateSummary(r.service.price).total;
+      }, 0);
+
+      document.getElementById("allCount").textContent = all;
+      document.getElementById("waitingCount").textContent = waiting;
+      document.getElementById("progressCount").textContent = progress;
+      document.getElementById("totalValue").textContent = formatMoney(total);
     }
 
-    body.innerHTML = "";
+    function renderReservations() {
+      jobsEl.innerHTML = "";
 
-    data.forEach((r, index) => {
-      const bookingId = "#BKG-" + String(r.id).padStart(4, "0");
+      if (reservations.length === 0) {
+        emptyEl.style.display = "grid";
+        renderStats();
+        return;
+      }
 
-      const serviceName = r.service || "Nie wybrano";
-      const dateValue = r.date || "-";
-      const message = r.message || "";
-      const timeMatch = message.match(/Godzina:\s*([^|]+)/);
-      const timeValue = timeMatch ? timeMatch[1].trim() : "-";
+      emptyEl.style.display = "none";
 
-      const car = r.car || "-";
+      reservations.forEach(reservation => {
+        const summary = calculateSummary(reservation.service.price);
 
-      body.innerHTML += `
-        <tr>
-          <td>${bookingId}</td>
+        const card = document.createElement("article");
+        card.className = "job-card";
 
-          <td>
-            <div class="customer">
-              <div class="mini-avatar"><i data-lucide="user" size="18"></i></div>
+        card.innerHTML = `
+          <div class="job-top">
+            <div class="job-title">
+              <div class="service-icon">${serviceIcon()}</div>
               <div>
-                <strong>${r.name || "-"}</strong>
-                <span>${r.phone || "-"}</span>
+                <h3>${reservation.service.name}</h3>
+                <p>${reservation.service.description}</p>
               </div>
             </div>
-          </td>
 
-          <td>
-            <div class="service">
-              <div class="service-icon s-blue"><i data-lucide="wrench" size="24"></i></div>
-              <div>
-                <strong>${serviceName}</strong>
-                <span>${message}</span>
+            <div class="status ${statusClass(reservation.status)}">${reservation.status}</div>
+          </div>
+
+          <div class="job-body">
+            <div class="details">
+              <div class="info-box">
+                <div class="label">Wybrana usługa</div>
+                <div class="value">${reservation.service.name}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Cena usługi</div>
+                <div class="value">${formatMoney(reservation.service.price)}</div>
+              </div>
+
+              <div class="info-box full">
+                <div class="label">Opis usługi</div>
+                <div class="muted-value">${reservation.service.description}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Data wizyty</div>
+                <div class="value">${reservation.date}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Godzina wizyty</div>
+                <div class="value">${reservation.time}</div>
+              </div>
+
+              <div class="info-box full">
+                <div class="label">Szacowany czas realizacji</div>
+                <div class="value">${reservation.duration}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Imię i nazwisko</div>
+                <div class="value">${reservation.customer.name}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Numer telefonu</div>
+                <div class="value">${reservation.customer.phone}</div>
+              </div>
+
+              <div class="info-box full">
+                <div class="label">Adres e-mail</div>
+                <div class="value">${reservation.customer.email}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Marka pojazdu</div>
+                <div class="value">${reservation.vehicle.brand}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Model pojazdu</div>
+                <div class="value">${reservation.vehicle.model}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Rok produkcji</div>
+                <div class="value">${reservation.vehicle.year}</div>
+              </div>
+
+              <div class="info-box">
+                <div class="label">Numer rejestracyjny</div>
+                <div class="value">${reservation.vehicle.registration}</div>
               </div>
             </div>
-          </td>
 
-          <td class="date">
-            ${dateValue}<br>
-            <span>${timeValue}</span>
-          </td>
+            <aside class="summary">
+              <h4>Podsumowanie rezerwacji</h4>
 
-          <td class="vehicle">
-            ${car}<br>
-            <span>-</span>
-          </td>
+              <div class="sum-row">
+                <span>Cena usługi</span>
+                <strong>${formatMoney(summary.price)}</strong>
+              </div>
 
-          <td>
-            <span class="status upcoming">
-              <span class="dot"></span>${r.status || "Nowa"}
-            </span>
-          </td>
+              <div class="sum-row">
+                <span>Opłata serwisowa</span>
+                <strong>${formatMoney(summary.fee)}</strong>
+              </div>
 
-          <td>-</td>
+              <div class="sum-row">
+                <span>Podatek VAT 23%</span>
+                <strong>${formatMoney(summary.vat)}</strong>
+              </div>
 
-          <td>
-            <div class="actions-row">
-              <button class="icon-btn" onclick="alert('Telefon: ${r.phone || "-"}')">
-                <i data-lucide="eye" size="17"></i>
-              </button>
-              <button class="icon-btn">
-                <i data-lucide="pencil" size="17"></i>
-              </button>
-              <button class="icon-btn">
-                <i data-lucide="ellipsis" size="17"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    });
+              <div class="sum-row total">
+                <span>Łącznie</span>
+                <strong>${formatMoney(summary.total)}</strong>
+              </div>
 
-    lucide.createIcons();
+              <div class="notify">
+                <div class="check ${reservation.notifications ? "" : "no"}">${reservation.notifications ? "✓" : "×"}</div>
+                <div>
+                  ${reservation.notifications
+                    ? "Klient chce otrzymywać powiadomienia o rezerwacji i promocjach serwisu."
+                    : "Klient nie chce otrzymywać powiadomień o rezerwacji i promocjach serwisu."
+                  }
+                </div>
+              </div>
+            </aside>
+          </div>
 
-    document.querySelector(".stat.blue h3").textContent = data.length;
-    document.querySelector(".stat.green h3").textContent = data.filter(r => r.status === "Nowa").length;
-    document.querySelector(".stat.orange h3").textContent = "0";
-    document.querySelector(".stat.purple h3").textContent = "0";
+          <div class="actions">
+            <button class="btn-start" onclick="startReservation(${reservation.id})" ${reservation.status === "W trakcie" ? "disabled" : ""}>
+              Rozpocznij
+            </button>
 
-    document.querySelector(".showing").textContent = `Showing 1 to ${data.length} of ${data.length} results`;
-  }
+            <button class="btn-finish" onclick="finishReservation(${reservation.id})">
+              Zakończ
+            </button>
 
-  checkLogin();
-</script>
+            <button class="btn-cancel" onclick="cancelReservation(${reservation.id})">
+              Anuluj
+            </button>
+          </div>
+        `;
+
+        jobsEl.appendChild(card);
+      });
+
+      renderStats();
+    }
+
+    function startReservation(id) {
+      reservations = reservations.map(reservation => {
+        if (reservation.id === id) {
+          return { ...reservation, status: "W trakcie" };
+        }
+
+        return reservation;
+      });
+
+      renderReservations();
+    }
+
+    function finishReservation(id) {
+      reservations = reservations.filter(reservation => reservation.id !== id);
+      renderReservations();
+    }
+
+    function cancelReservation(id) {
+      reservations = reservations.filter(reservation => reservation.id !== id);
+      renderReservations();
+    }
+
+    renderReservations();
+  </script>
 </body>
 </html>
