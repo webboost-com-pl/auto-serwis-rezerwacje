@@ -1,1 +1,165 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Panel mechanika</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      padding: 30px;
+    }
+
+    .box {
+      max-width: 900px;
+      margin: auto;
+      background: #1c1c1c;
+      padding: 25px;
+      border-radius: 16px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #e6332a;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .reservation {
+      background: #2a2a2a;
+      padding: 18px;
+      border-radius: 12px;
+      margin-top: 15px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .small-btn {
+      width: auto;
+      padding: 10px 14px;
+      margin-right: 8px;
+      margin-top: 10px;
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box" id="loginBox">
+    <h1>Logowanie mechanika</h1>
+
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Hasło">
+
+    <button onclick="login()">Zaloguj</button>
+
+    <p id="loginMsg"></p>
+  </div>
+
+  <div class="box hidden" id="panelBox">
+    <h1>Panel rezerwacji</h1>
+    <button onclick="logout()">Wyloguj</button>
+
+    <div id="reservations"></div>
+  </div>
+
+  <script>
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const loginMsg = document.getElementById("loginMsg");
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) {
+        loginMsg.textContent = "Błędny email lub hasło.";
+        loginMsg.style.color = "red";
+        console.log(error);
+        return;
+      }
+
+      showPanel();
+    }
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      document.getElementById("loginBox").classList.remove("hidden");
+      document.getElementById("panelBox").classList.add("hidden");
+    }
+
+    async function showPanel() {
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("panelBox").classList.remove("hidden");
+      loadReservations();
+    }
+
+    async function loadReservations() {
+      const container = document.getElementById("reservations");
+      container.innerHTML = "Ładowanie...";
+
+      const { data, error } = await supabaseClient
+        .from("reservations")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        container.innerHTML = "Błąd pobierania rezerwacji.";
+        console.log(error);
+        return;
+      }
+
+      if (data.length === 0) {
+        container.innerHTML = "<p>Brak rezerwacji.</p>";
+        return;
+      }
+
+      container.innerHTML = "";
+
+      data.forEach(r => {
+        container.innerHTML += `
+          <div class="reservation">
+            <h3>${r.name}</h3>
+            <p><b>Telefon:</b> ${r.phone}</p>
+            <p><b>Auto:</b> ${r.car || "-"}</p>
+            <p><b>Usługa:</b> ${r.service || "-"}</p>
+            <p><b>Data:</b> ${r.date || "-"}</p>
+            <p><b>Opis:</b> ${r.message || "-"}</p>
+            <p><b>Status:</b> ${r.status}</p>
+          </div>
+        `;
+      });
+    }
+
+    async function checkSession() {
+      const { data } = await supabaseClient.auth.getSession();
+
+      if (data.session) {
+        showPanel();
+      }
+    }
+
+    checkSession();
+  </script>
+
+</body>
+</html>
