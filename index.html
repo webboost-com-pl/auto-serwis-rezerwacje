@@ -640,7 +640,7 @@ const state = {
 
     nameInput.addEventListener('input',()=>{successMsg.classList.remove('show');validate();});
     phoneInput.addEventListener('input',()=>{successMsg.classList.remove('show');validate();});
-   reserveBtn.addEventListener('click', async () => {
+ reserveBtn.addEventListener('click', async () => {
   if (reserveBtn.disabled) return;
 
   const reservation = {
@@ -663,22 +663,7 @@ const state = {
     return;
   }
 
-  successMsg.classList.add('show');
-  reserveBtn.textContent = 'TERMIN ZAREZERWOWANY';
-   window.location.href = "https://buy.stripe.com/test_6oU3cn0Kefp6dkIeZ94gg00";
-
-  nameInput.value = "";
-  phoneInput.value = "";
-
-  state.service = null;
-  state.selectedDate = null;
-  state.selectedTime = "";
-
-  renderAll();
-
-  setTimeout(() => {
-    reserveBtn.textContent = 'ZAREZERWUJ TERMIN';
-  }, 2200);
+  window.location.href = "https://buy.stripe.com/test_6oU3cn0Kefp6dkIeZ94gg00";
 });
 
     renderAll();
