@@ -1,373 +1,725 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Studio Hair Beauty — Panel fryzjera</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Beauty Studio — Panel Fryzjerki</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>  <style>
-    :root{
-      --accent:#d99691;
-      --accent-dark:#c77f79;
-      --text:#242424;
-      --muted:#707070;
-      --line:#ececec;
-      --soft:#fbf2ef;
-      --green:#2f8f58;
-      --yellow:#c58a2b;
-      --red:#b64747;
-      --shadow:0 14px 35px rgba(0,0,0,.07);
-      --card-shadow:0 8px 24px rgba(192,132,124,.11);
-    }
+<script src="config.js"></script>
+<style>
+  .status-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:22px;
+}
 
-    *{box-sizing:border-box}
+.status-btn{
+  height:46px;
+  border:1px solid #f0ded9;
+  border-radius:15px;
+  background:#fff7f5;
+  color:#9b6b66;
+  font-weight:700;
+  cursor:pointer;
+}
 
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at 12% 8%, rgba(217,150,145,.13), transparent 30%),
-        radial-gradient(circle at 92% 82%, rgba(217,150,145,.14), transparent 32%),
-        linear-gradient(135deg,#fff 0%,#fffaf8 48%,#fbf1ed 100%);
-    }
+.status-btn.active{
+  background:linear-gradient(90deg,#df8888,#e69595);
+  color:white;
+  border-color:transparent;
+}
+:root{
+  --bg:#fff8f6;
+  --white:#fff;
+  --text:#25262a;
+  --muted:#7e7e82;
+  --line:#eee7e5;
+  --accent:#e58d8d;
+  --accent-dark:#d97979;
+  --soft:#fff1ef;
+  --shadow:0 22px 55px rgba(105,72,64,.12);
+}
 
-    .topbar{
-      height:104px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 50px;
-      border-bottom:1px solid #e7e3df;
-      background:rgba(255,255,255,.88);
-      backdrop-filter:blur(12px);
-      box-shadow:0 2px 10px rgba(0,0,0,.035);
-    }
+*{box-sizing:border-box}
 
-    .brand{display:flex;align-items:center;gap:38px}
-    .logo-mark{width:66px;height:66px;position:relative;color:#cf8f87;font-family:Georgia,"Times New Roman",serif;line-height:.76;letter-spacing:-9px;font-size:47px;font-weight:400;opacity:.95}
-    .logo-mark span{position:absolute;display:block}.logo-mark .s{left:3px;top:3px}.logo-mark .h{left:22px;top:14px;font-size:43px}.logo-mark .b{left:34px;top:22px;font-size:42px}
-    .brand-title{font-family:Georgia,"Times New Roman",serif;font-size:33px;font-weight:400;letter-spacing:-.3px;margin-bottom:7px}
-    .brand-subtitle{font-size:11px;letter-spacing:6px;color:#4d4d4d;font-weight:600}
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(135deg,#fff8f5,#f8ece8);
+  font-family:Inter,sans-serif;
+  color:var(--text);
+}
 
-    .user-box{display:flex;align-items:center;gap:14px;color:#3b3b3b}
-    .avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #f0ded9}
-    .user-name{font-size:14px;font-weight:750}.user-role{font-size:12px;color:#777;margin-top:2px}
+.app{
+  max-width:1280px;
+  margin:auto;
+  padding:32px 24px;
+}
 
-    .page{max-width:1400px;margin:0 auto;padding:32px 28px 44px}
+.topbar{
+  background:#fff;
+  border-radius:34px;
+  box-shadow:var(--shadow);
+  padding:28px 32px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:24px;
+  margin-bottom:28px;
+}
 
-    .hero{
-      display:flex;align-items:flex-end;justify-content:space-between;gap:25px;
-      margin-bottom:26px;
-    }
-    .eyebrow{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#c37c75;font-weight:800;margin-bottom:10px}
-    h1{font-size:32px;line-height:1.12;margin:0;font-weight:760;letter-spacing:-.7px}
-    .hero p{margin:10px 0 0;color:#707070;font-size:15px;line-height:1.55}
+.logo{
+  font-family:"Playfair Display",serif;
+  font-size:42px;
+}
 
-    .date-pill{
-      min-width:220px;height:52px;border-radius:12px;border:1px solid #eee1dd;background:#fff;
-      box-shadow:0 6px 18px rgba(0,0,0,.045);display:flex;align-items:center;justify-content:center;
-      color:#c77f79;font-weight:750;font-size:14px;
-    }
+.sublogo{
+  color:#9c8580;
+  font-size:11px;
+  letter-spacing:6px;
+  margin-top:2px;
+}
 
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:18px;
-      margin-bottom:24px;
-    }
-    .stat-card{
-      background:rgba(255,255,255,.88);border:1px solid #eee;border-radius:15px;padding:20px;
-      box-shadow:var(--card-shadow);display:flex;align-items:center;gap:15px;
-    }
-    .stat-icon{width:46px;height:46px;border-radius:14px;background:#fbf2ef;color:#c77f79;display:grid;place-items:center;flex:none}
-    .stat-icon svg{width:22px;height:22px;stroke-width:1.8}
-    .stat-number{font-size:25px;font-weight:800;margin-bottom:3px}.stat-label{font-size:13px;color:#777}
+.profile{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
 
-    .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.avatar{
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#f2aaa6,#e57f82);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:24px;
+}
 
-    .panel{
-      background:rgba(255,255,255,.9);border:1px solid #eee;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
-    }
+.profile strong{
+  display:block;
+}
 
-    .panel-head{
-      padding:20px 22px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:16px;
-    }
-    .panel-title{font-size:18px;font-weight:800}.panel-sub{font-size:13px;color:#777;margin-top:3px}
+.profile span{
+  color:var(--muted);
+  font-size:14px;
+}
 
-    .filters{display:flex;gap:10px;flex-wrap:wrap}
-    .filter-btn{
-      border:1px solid #eadbd7;background:#fff;color:#555;border-radius:999px;padding:9px 13px;font-size:13px;cursor:pointer;font-weight:650;
-    }
-    .filter-btn.active{background:#d99691;color:#fff;border-color:#d99691;box-shadow:0 5px 13px rgba(217,146,140,.25)}
+.layout{
+  display:grid;
+  grid-template-columns:1fr 380px;
+  gap:28px;
+}
 
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;min-width:820px}
-    th{text-align:left;padding:15px 22px;font-size:12px;letter-spacing:.7px;text-transform:uppercase;color:#777;background:#fffaf8;border-bottom:1px solid #eee}
-    td{padding:17px 22px;border-bottom:1px solid #f0f0f0;vertical-align:middle;font-size:14px}
-    tr:hover td{background:#fffaf8}
+.hero{
+  min-height:230px;
+  border-radius:36px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+  padding:38px;
+  background:
+    linear-gradient(90deg,rgba(255,245,242,.94) 0%,rgba(255,245,242,.68) 42%,rgba(255,255,255,0) 100%),
+    url("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80");
+  background-size:cover;
+  background-position:center;
+  margin-bottom:28px;
+}
 
-    .client{display:flex;align-items:center;gap:12px}
-    .client-avatar{width:42px;height:42px;border-radius:50%;background:#fbf2ef;color:#c77f79;display:grid;place-items:center;font-weight:800;border:1px solid #f0ded9;flex:none}
-    .client-name{font-weight:800;margin-bottom:4px}.client-phone{font-size:12px;color:#777}
-    .service-name{font-weight:750;margin-bottom:4px}.service-desc{font-size:12px;color:#777;max-width:230px;line-height:1.35}
-    .time{font-size:16px;font-weight:800;color:#252525}.price{font-weight:800;color:#c77f79}
+.hero h1{
+  font-family:"Playfair Display",serif;
+  font-size:50px;
+  line-height:1.1;
+  font-weight:400;
+  margin:0 0 16px;
+}
 
-    .status{
-      display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:800;
-    }
-    .status.confirmed{color:var(--green);background:#eefaf3}.status.waiting{color:var(--yellow);background:#fff7e8}.status.done{color:#555;background:#f3f3f3}.status.cancelled{color:var(--red);background:#fff0f0}
-    .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.hero p{
+  color:#7b6d69;
+  max-width:460px;
+  line-height:1.7;
+  margin:0;
+}
 
-    .actions{display:flex;gap:8px}
-    .small-btn{height:34px;border:1px solid #eadbd7;background:#fff;border-radius:9px;padding:0 10px;cursor:pointer;color:#555;font-weight:700;font-size:12px}
-    .small-btn.primary{background:#d99691;border-color:#d99691;color:#fff}.small-btn:hover{filter:brightness(.98);transform:translateY(-1px)}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-bottom:28px;
+}
 
-    .side-card{background:linear-gradient(112deg,#fbf2ef 0%,#fff9f4 57%,#f8ebe4 100%);border:1px solid #f0ded9;border-radius:16px;padding:24px;box-shadow:var(--card-shadow);margin-bottom:24px}
-    .side-card h3{margin:0 0 18px;font-size:19px;font-weight:750}
-    .next-box{display:flex;gap:14px;align-items:center;margin-bottom:22px}
-    .next-box img{width:70px;height:70px;border-radius:50%;object-fit:cover;background:#ead7ca}
-    .next-title{font-weight:850;margin-bottom:6px}.next-sub{font-size:13px;color:#666;line-height:1.45}
-    .summary-line{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-top:1px solid #eadbd7;font-size:14px;color:#555}
-    .summary-line strong{color:#252525}
+.stat{
+  background:#fff;
+  border-radius:28px;
+  box-shadow:var(--shadow);
+  padding:24px;
+}
 
-    .add-form{display:grid;gap:12px}
-    .input-wrap{height:48px;border:1px solid #e8e8e8;border-radius:10px;background:#fff;box-shadow:0 4px 13px rgba(0,0,0,.035);display:flex;align-items:center;padding:0 13px}
-    .input-wrap input,.input-wrap select{width:100%;border:0;outline:0;background:transparent;font-family:inherit;font-size:14px;color:#252525}
-    .add-btn{height:50px;border:0;border-radius:10px;background:#d99691;color:#fff;font-weight:750;letter-spacing:1px;cursor:pointer;box-shadow:0 7px 17px rgba(217,146,140,.28)}
-    .empty{display:none;text-align:center;padding:46px 20px;color:#777}
-    .toast{position:fixed;right:24px;bottom:24px;background:#2f8f58;color:#fff;padding:14px 18px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.15);font-weight:750;display:none}.toast.show{display:block}
+.stat span{
+  color:var(--muted);
+  font-size:14px;
+}
 
-    @media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.date-pill{justify-content:flex-start;padding:0 16px}}
-    @media(max-width:640px){
-      .topbar{height:auto;padding:18px 14px;gap:12px;align-items:flex-start}.brand{gap:12px}.logo-mark{width:42px;height:42px;font-size:30px;letter-spacing:-6px}.logo-mark .h{left:14px;top:8px;font-size:28px}.logo-mark .b{left:22px;top:14px;font-size:27px}.brand-title{font-size:20px}.brand-subtitle{font-size:8px;letter-spacing:3px}.user-box{display:none}
-      .page{padding:22px 12px 34px}.stats{grid-template-columns:1fr;gap:12px}h1{font-size:25px}.panel-head{align-items:flex-start;flex-direction:column}.side-card{padding:20px}.toast{left:12px;right:12px;bottom:14px;text-align:center}
-    }
-  </style>
+.stat strong{
+  display:block;
+  font-size:34px;
+  margin-top:8px;
+  color:var(--accent-dark);
+}
+
+.section{
+  background:#fff;
+  border-radius:34px;
+  box-shadow:var(--shadow);
+  padding:30px;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  margin-bottom:24px;
+}
+
+.section h2{
+  font-family:"Playfair Display",serif;
+  font-size:34px;
+  font-weight:400;
+  margin:0;
+}
+
+.date-pill{
+  background:#fff1ef;
+  color:#b96d69;
+  border-radius:999px;
+  padding:12px 18px;
+  font-weight:600;
+  font-size:14px;
+}
+
+.booking-list{
+  display:grid;
+  gap:16px;
+}
+
+.booking{
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:18px;
+  display:grid;
+  grid-template-columns:90px 1fr auto;
+  gap:18px;
+  align-items:center;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.booking:hover,
+.booking.active{
+  border-color:#ef8b8d;
+  box-shadow:0 0 0 1px #ef8b8d inset, 0 14px 30px rgba(105,72,64,.08);
+}
+
+.time{
+  width:72px;
+  height:72px;
+  border-radius:22px;
+  background:linear-gradient(135deg,#fff2ef,#f8e4df);
+  display:grid;
+  place-items:center;
+  color:#c96f6f;
+  font-weight:700;
+  font-size:18px;
+}
+
+.booking h3{
+  margin:0 0 7px;
+  font-size:18px;
+}
+
+.booking p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.price{
+  color:#d97979;
+  font-weight:700;
+  font-size:18px;
+}
+
+.status{
+  margin-top:10px;
+  display:inline-flex;
+  border-radius:999px;
+  padding:7px 12px;
+  background:#fff4f1;
+  color:#c56e6e;
+  font-size:13px;
+  font-weight:600;
+}
+
+.sidebar{
+  position:sticky;
+  top:24px;
+  align-self:start;
+}
+
+.details{
+  background:#fff;
+  border-radius:34px;
+  box-shadow:var(--shadow);
+  padding:30px;
+}
+
+.details h2{
+  font-family:"Playfair Display",serif;
+  font-size:32px;
+  font-weight:400;
+  margin:0 0 22px;
+}
+
+.detail-row{
+  padding:16px 0;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+}
+
+.detail-row span{
+  color:var(--muted);
+}
+
+.detail-row strong{
+  text-align:right;
+}
+
+.note{
+  margin-top:22px;
+  background:linear-gradient(180deg,#fffaf8,#fff2ef);
+  border:1px solid #f0ded9;
+  border-radius:24px;
+  padding:20px;
+}
+
+.note span{
+  display:block;
+  color:#8b7a76;
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+.note p{
+  margin:0;
+  line-height:1.6;
+}
+
+.actions{
+  display:grid;
+  gap:12px;
+  margin-top:24px;
+}
+
+.btn{
+  width:100%;
+  height:58px;
+  border:0;
+  border-radius:18px;
+  font:inherit;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.btn.primary{
+  background:linear-gradient(90deg,#df8888,#e69595);
+  color:#fff;
+  letter-spacing:2px;
+}
+
+.btn.light{
+  background:#fff1ef;
+  color:#a86a66;
+}
+
+.empty{
+  color:var(--muted);
+  line-height:1.6;
+}
+
+@media(max-width:850px){
+  .app{
+    padding:0;
+  }
+
+  .topbar{
+    border-radius:0;
+    box-shadow:none;
+    padding:26px 24px;
+  }
+
+  .logo{
+    font-size:34px;
+  }
+
+  .sublogo{
+    font-size:9px;
+    letter-spacing:5px;
+  }
+
+  .profile{
+    display:none;
+  }
+
+  .layout{
+    display:block;
+  }
+
+  .hero{
+    border-radius:0;
+    min-height:310px;
+    margin:0;
+    padding:42px 24px;
+    background:
+      linear-gradient(90deg,rgba(255,245,242,.88),rgba(255,245,242,.25),rgba(255,255,255,0)),
+      url("https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=900&q=80");
+    background-size:cover;
+    background-position:center right;
+  }
+
+  .hero h1{
+    display:inline-block;
+    background:rgba(255,248,246,.88);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-radius:24px;
+    padding:18px 20px;
+    font-size:37px;
+    box-shadow:0 16px 35px rgba(80,45,38,.15);
+  }
+
+  .hero p{
+    display:none;
+  }
+
+  .stats{
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    padding:18px;
+    margin:0;
+  }
+
+  .stat{
+    border-radius:22px;
+    padding:16px 12px;
+  }
+
+  .stat strong{
+    font-size:25px;
+  }
+
+  .section{
+    border-radius:28px 28px 0 0;
+    padding:24px 18px;
+  }
+
+  .section-head{
+    display:block;
+  }
+
+  .section h2{
+    font-size:32px;
+    margin-bottom:12px;
+  }
+
+  .booking{
+    grid-template-columns:68px 1fr;
+    padding:14px;
+  }
+
+  .time{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    font-size:15px;
+  }
+
+  .price{
+    grid-column:2;
+  }
+
+  .sidebar{
+    position:static;
+    padding:18px;
+  }
+
+  .details{
+    border-radius:28px;
+    padding:24px;
+  }
+}
+.empty-big{
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:34px 20px;
+  border:1px dashed #eadbd7;
+  border-radius:26px;
+  background:linear-gradient(180deg,#fffaf8,#fff2ef);
+  color:#8b7a76;
+}
+
+.empty-big-icon{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#f2aaa6,#e57f82);
+  color:white;
+  display:grid;
+  place-items:center;
+  font-size:34px;
+  margin-bottom:18px;
+}
+
+.empty-big h3{
+  margin:0 0 8px;
+  font-family:"Playfair Display",serif;
+  font-size:28px;
+  font-weight:400;
+  color:#25262a;
+}
+
+.empty-big p{
+  margin:0;
+  max-width:360px;
+  line-height:1.6;
+}
+</style>
 </head>
+
 <body>
+
+<div class="app">
+
   <header class="topbar">
-    <div class="brand">
-      <div class="logo-mark" aria-hidden="true"><span class="s">S</span><span class="h">H</span><span class="b">B</span></div>
-      <div><div class="brand-title">Studio Hair Beauty</div><div class="brand-subtitle">SALON FRYZJERSKI</div></div>
+    <div>
+      <div class="logo">Beauty Studio</div>
+      <div class="sublogo">PANEL PRACOWNIKA</div>
     </div>
-    <div class="user-box">
-      <img class="avatar" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=160&q=80" alt="Fryzjerka">
-      <div><div class="user-name">Panel fryzjera</div><div class="user-role">Dzisiejsze rezerwacje</div></div>
+
+    <div class="profile">
+      <div class="avatar">J</div>
+      <div>
+        <strong>Julia</strong>
+        <span>Fryzjerka / stylistka</span>
+      </div>
     </div>
   </header>
 
-  <main class="page">
-    <section class="hero">
-      <div>
-        <div class="eyebrow">Dashboard salonu</div>
-        <h1>Rezerwacje klientów</h1>
-        <p>Sprawdzaj, kto zarezerwował wizytę, jaką usługę wybrał, na którą godzinę i jaki jest status wizyty.</p>
+  <div class="layout">
+    <main>
+      <section class="hero">
+        <h1>Dzień dobry,<br>Julia</h1>
+        <p>Sprawdź dzisiejsze rezerwacje, godziny wizyt, dane klientek oraz szczegóły usług.</p>
+      </section>
+
+      <section class="stats">
+  <div class="stat">
+    <span>Rezerwacje</span>
+    <strong id="statCount">0</strong>
+  </div>
+  <div class="stat">
+    <span>Wartość</span>
+    <strong id="statMoney">0 zł</strong>
+  </div>
+  <div class="stat">
+    <span>Najbliższa</span>
+    <strong id="statNext">—</strong>
+  </div>
+</section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Dzisiejsze rezerwacje</h2>
+          <div class="date-pill">15 maja 2026</div>
+        </div>
+
+        <div class="booking-list" id="bookingList"></div>
+      </section>
+    </main>
+
+    <aside class="sidebar">
+      <div class="details" id="details"></div>
+    </aside>
+  </div>
+</div>
+
+<script>
+let bookings = [];
+
+let active = 0;
+
+function renderList(){
+  const list = document.getElementById("bookingList");
+
+  if (bookings.length === 0) {
+    list.innerHTML = `
+      <div class="empty-big">
+        <div class="empty-big-icon">📅</div>
+        <h3>Brak rezerwacji</h3>
+        <p>Gdy klient zarezerwuje wizytę przez formularz, pojawi się ona tutaj automatycznie.</p>
       </div>
-      <div class="date-pill" id="todayLabel"></div>
-    </section>
-
-    <section class="stats">
-      <div class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><div><div class="stat-number" id="countAll">0</div><div class="stat-label">Wizyty dzisiaj</div></div></div>
-      <div class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="stat-number" id="countConfirmed">0</div><div class="stat-label">Potwierdzone</div></div></div>
-      <div class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><div class="stat-number" id="countWaiting">0</div><div class="stat-label">Oczekujące</div></div></div>
-      <div class="stat-card"><div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="stat-number" id="sumMoney">0 zł</div><div class="stat-label">Wartość wizyt</div></div></div>
-    </section>
-
-    <section class="layout">
-      <div class="panel">
-        <div class="panel-head">
-          <div><div class="panel-title">Lista rezerwacji</div><div class="panel-sub">Kliknij status, aby oznaczyć wizytę jako zakończoną lub anulowaną.</div></div>
-          <div class="filters">
-            <button class="filter-btn active" data-filter="all">Wszystkie</button>
-            <button class="filter-btn" data-filter="confirmed">Potwierdzone</button>
-            <button class="filter-btn" data-filter="waiting">Oczekujące</button>
-            <button class="filter-btn" data-filter="done">Zakończone</button>
-          </div>
-        </div>
-
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Klient</th><th>Usługa</th><th>Godzina</th><th>Cena</th><th>Status</th><th>Akcje</th></tr></thead>
-            <tbody id="bookingRows"></tbody>
-          </table>
-          <div class="empty" id="emptyState">Brak rezerwacji w tej kategorii.</div>
-        </div>
-      </div>
-
-      <aside>
-        <div class="side-card">
-          <h3>Najbliższa wizyta</h3>
-          <div class="next-box">
-            <img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?auto=format&fit=crop&w=160&q=80" alt="Klientka">
-            <div><div class="next-title" id="nextClient">—</div><div class="next-sub" id="nextDetails">Brak aktywnych wizyt.</div></div>
-          </div>
-          <div class="summary-line"><span>Godzina</span><strong id="nextTime">—</strong></div>
-          <div class="summary-line"><span>Telefon</span><strong id="nextPhone">—</strong></div>
-          <div class="summary-line"><span>Do zapłaty</span><strong id="nextPrice">—</strong></div>
-        </div>
-
-        <div class="side-card">
-          <h3>Dodaj rezerwację</h3>
-          <form class="add-form" id="addForm">
-            <label class="input-wrap"><input id="newName" placeholder="Imię klientki" /></label>
-            <label class="input-wrap"><input id="newPhone" placeholder="Numer telefonu" /></label>
-            <label class="input-wrap"><select id="newService"></select></label>
-            <label class="input-wrap"><input id="newTime" type="time" value="12:30" /></label>
-            <button class="add-btn" type="submit">DODAJ WIZYTĘ</button>
-          </form>
-        </div>
-      </aside>
-    </section>
-  </main>
-
-  <div class="toast" id="toast">Zaktualizowano wizytę</div>
-
-  <script>
-    const services = [
-      {name:'Strzyżenie damskie', desc:'Profesjonalne strzyżenie dopasowane do klientki.', price:120},
-      {name:'Podcinanie końcówek', desc:'Zdrowe odświeżenie końcówek włosów.', price:80},
-      {name:'Koloryzacja włosów', desc:'Kompleksowa koloryzacja z pielęgnacją.', price:180},
-      {name:'Balayage / ombre', desc:'Naturalne przejścia kolorów.', price:250},
-      {name:'Stylizacja włosów', desc:'Modelowanie i stylizacja na okazję.', price:100},
-      {name:'Kręcenie włosów / loki', desc:'Loki i fale na dłużej.', price:120},
-      {name:'Prostowanie włosów', desc:'Gładkie, lśniące włosy.', price:120},
-      {name:'Regeneracja włosów', desc:'Intensywna regeneracja i odżywienie.', price:150}
-    ];
-
-    let filter = 'all';
-    let bookings = [];
-	async function loadBookings() {
-  const { data: sessionData } = await supabaseClient.auth.getSession();
-
-  if (!sessionData.session) {
-    window.location.href = "login.html";
+    `;
+    updateStats();
     return;
   }
 
+  list.innerHTML = bookings.map((b,i)=>`
+    <div class="booking ${active===i?'active':''}" onclick="selectBooking(${i})">
+      <div class="time">${b.time}</div>
+
+      <div>
+        <h3>${b.client}</h3>
+        <p>${b.service} • ${b.duration}</p>
+        <span class="status">${b.status}</span>
+      </div>
+
+      <div class="price">${b.price}</div>
+    </div>
+  `).join("");
+
+  updateStats();
+}
+function updateStats(){
+  const count = bookings.length;
+
+  const total = bookings.reduce((sum, b) => {
+    const number = parseFloat(String(b.price).replace(",", ".").replace(/[^\d.]/g, ""));
+    return sum + (isNaN(number) ? 0 : number);
+  }, 0);
+
+  const next = bookings
+    .map(b => b.time)
+    .filter(t => t && t !== "-")
+    .sort()[0] || "—";
+
+  document.getElementById("statCount").textContent = count;
+  document.getElementById("statMoney").textContent = `${total} zł`;
+  document.getElementById("statNext").textContent = next;
+}
+
+function renderDetails(){
+  if (bookings.length === 0) {
+  document.getElementById("details").innerHTML = `
+    <h2>Szczegóły wizyty</h2>
+    <p class="empty">Brak rezerwacji do wyświetlenia.</p>
+  `;
+  return;
+}
+  const b = bookings[active];
+
+  document.getElementById("details").innerHTML = `
+    <h2>Szczegóły wizyty</h2>
+
+    <div class="detail-row"><span>Godzina</span><strong>${b.time}</strong></div>
+    <div class="detail-row"><span>Klientka</span><strong>${b.client}</strong></div>
+    <div class="detail-row"><span>Telefon</span><strong>${b.phone}</strong></div>
+    <div class="detail-row"><span>Usługa</span><strong>${b.service}</strong></div>
+    <div class="detail-row"><span>Czas</span><strong>${b.duration}</strong></div>
+    <div class="detail-row"><span>Cena</span><strong>${b.price}</strong></div>
+    <div class="detail-row"><span>Status</span><strong>${b.status}</strong></div>
+
+    <div class="note">
+      <span>Uwagi klientki</span>
+      <p>${b.note}</p>
+    </div>
+
+    <div class="status-buttons">
+      <button class="status-btn ${b.status==='Nowa'?'active':''}" onclick="changeStatus('Nowa')">Nowa</button>
+      <button class="status-btn ${b.status==='Potwierdzona'?'active':''}" onclick="changeStatus('Potwierdzona')">Potwierdzona</button>
+      <button class="status-btn ${b.status==='Oczekuje'?'active':''}" onclick="changeStatus('Oczekuje')">Oczekuje</button>
+      <button class="status-btn ${b.status==='Zakończona'?'active':''}" onclick="changeStatus('Zakończona')">Zakończona</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" onclick="changeStatus('Zakończona')">ZAKOŃCZ WIZYTĘ</button>
+      <button class="btn light" onclick="alert('Tutaj można dodać zmianę terminu')">ZMIEŃ TERMIN</button>
+    </div>
+  `;
+}
+
+function selectBooking(i){
+  active = i;
+  renderList();
+  renderDetails();
+}
+
+async function changeStatus(newStatus){
+  const booking = bookings[active];
+  if (!booking) return;
+
+  const { error } = await supabaseClient
+    .from("reservations")
+    .update({ status: newStatus })
+    .eq("id", booking.id);
+
+  if (error) {
+    console.log(error);
+    alert("Nie udało się zmienić statusu.");
+    return;
+  }
+
+  bookings[active].status = newStatus;
+  renderList();
+  renderDetails();
+}
+async function loadBookings(){
   const { data, error } = await supabaseClient
     .from("reservations")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) {
+  if(error){
     console.log(error);
-    showToast("Błąd pobierania rezerwacji");
+    alert("Błąd pobierania rezerwacji");
     return;
   }
 
   bookings = data.map(r => {
     const msg = r.message || "";
-    const timeMatch = msg.match(/Godzina:\s*([^|]+)/);
-    const priceMatch = msg.match(/Cena:\s*(\d+)/);
-    const descMatch = msg.match(/Opis:\s*([^|]+)/);
 
-    const foundService = services.find(s => s.name === r.service);
+    const timeMatch = msg.match(/Godzina:\s*([^|]+)/);
+    const priceMatch = msg.match(/Cena:\s*([^|]+)/);
+    const noteMatch = msg.match(/Opis:\s*([^|]+)/);
 
     return {
       id: r.id,
-      name: r.name || "-",
-      phone: r.phone || "-",
-      service: foundService || {
-        name: r.service || "Nieznana usługa",
-        desc: descMatch ? descMatch[1].trim() : "Usługa z rezerwacji",
-        price: priceMatch ? Number(priceMatch[1]) : 0
-      },
       time: timeMatch ? timeMatch[1].trim() : "-",
-      status: r.status === "Zakończone" ? "done" : r.status === "Anulowana" ? "cancelled" : r.status === "Nowa" ? "waiting" : "confirmed"
+      client: r.name || "-",
+      service: r.service || "-",
+      duration: "60 min",
+      price: priceMatch ? priceMatch[1].trim() : "-",
+      phone: r.phone || "-",
+      status: r.status || "Nowa",
+      note: noteMatch ? noteMatch[1].trim() : "Brak uwag."
     };
   });
 
-  render();
+  active = 0;
+  renderList();
+  renderDetails();
 }
-    const statusText = {confirmed:'Potwierdzona', waiting:'Oczekuje', done:'Zakończona', cancelled:'Anulowana'};
-    const rows = document.getElementById('bookingRows');
-    const empty = document.getElementById('emptyState');
-    const toast = document.getElementById('toast');
+loadBookings();
+</script>
 
-    function initials(name){return name.split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase()}
-    function showToast(text){toast.textContent=text;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1800)}
-    function today(){const d=new Date();return d.toLocaleDateString('pl-PL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
-
-    function render(){
-      document.getElementById('todayLabel').textContent = today();
-      const filtered = filter === 'all' ? bookings : bookings.filter(b=>b.status===filter);
-      rows.innerHTML = filtered.map(b=>`
-        <tr>
-          <td><div class="client"><div class="client-avatar">${initials(b.name)}</div><div><div class="client-name">${b.name}</div><div class="client-phone">${b.phone}</div></div></div></td>
-          <td><div class="service-name">${b.service.name}</div><div class="service-desc">${b.service.desc}</div></td>
-          <td><div class="time">${b.time}</div></td>
-          <td><div class="price">${b.service.price} zł</div></td>
-          <td><span class="status ${b.status}"><span class="dot"></span>${statusText[b.status]}</span></td>
-          <td><div class="actions"><button class="small-btn primary" onclick="setStatus(${b.id},'done')">Zakończ</button><button class="small-btn" onclick="setStatus(${b.id},'cancelled')">Anuluj</button></div></td>
-        </tr>`).join('');
-      empty.style.display = filtered.length ? 'none' : 'block';
-      updateStats();
-      updateNext();
-    }
-
-    function updateStats(){
-      document.getElementById('countAll').textContent = bookings.length;
-      document.getElementById('countConfirmed').textContent = bookings.filter(b=>b.status==='confirmed').length;
-      document.getElementById('countWaiting').textContent = bookings.filter(b=>b.status==='waiting').length;
-      document.getElementById('sumMoney').textContent = bookings.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+b.service.price,0)+' zł';
-    }
-
-    function updateNext(){
-      const active = bookings.filter(b=>b.status==='confirmed' || b.status==='waiting').sort((a,b)=>a.time.localeCompare(b.time))[0];
-      document.getElementById('nextClient').textContent = active ? active.name : '—';
-      document.getElementById('nextDetails').textContent = active ? active.service.name : 'Brak aktywnych wizyt.';
-      document.getElementById('nextTime').textContent = active ? active.time : '—';
-      document.getElementById('nextPhone').textContent = active ? active.phone : '—';
-      document.getElementById('nextPrice').textContent = active ? active.service.price+' zł' : '—';
-    }
-
-   window.setStatus = async function(id, status) {
-  const dbStatus = status === "done" ? "Zakończone" : "Anulowana";
-
-  const { error } = await supabaseClient
-    .from("reservations")
-    .update({ status: dbStatus })
-    .eq("id", id);
-
-  if (error) {
-    console.log(error);
-    showToast("Błąd aktualizacji");
-    return;
-  }
-
-  showToast(status === "done" ? "Wizyta oznaczona jako zakończona" : "Wizyta została anulowana");
-  loadBookings();
-}
-
-    document.querySelectorAll('.filter-btn').forEach(btn=>{
-      btn.addEventListener('click',()=>{
-        document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        filter = btn.dataset.filter;
-        render();
-      });
-    });
-
-    const select = document.getElementById('newService');
-    select.innerHTML = services.map((s,i)=>`<option value="${i}">${s.name} — ${s.price} zł</option>`).join('');
-
-    document.getElementById('addForm').addEventListener('submit',(e)=>{
-      e.preventDefault();
-      const name = document.getElementById('newName').value.trim();
-      const phone = document.getElementById('newPhone').value.trim();
-      const service = services[Number(select.value)];
-      const time = document.getElementById('newTime').value;
-      if(!name || !phone || !time){showToast('Uzupełnij wszystkie pola');return;}
-      bookings.push({id:Date.now(),name,phone,service,time,status:'waiting'});
-      e.target.reset();
-      document.getElementById('newTime').value='12:30';
-      showToast('Dodano nową rezerwację');
-      render();
-    });
-
-    loadBookings();
-  </script>
 </body>
 </html>
